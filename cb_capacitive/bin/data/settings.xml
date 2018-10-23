@@ -1,0 +1,8 @@
+<settings>
+    <client_ip>169.254.0.1</client_ip>
+    <port>12345</port>
+    <threshold>12</threshold>
+    <release>6</release>
+    <id>cap</id>
+    <verbose>0</verbose>
+</settings>

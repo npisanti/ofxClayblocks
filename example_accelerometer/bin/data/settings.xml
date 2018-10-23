@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<gui>
+	<cvtracker>
+		<background_subtraction>0</background_subtraction>
+		<threshold_low>2</threshold_low>
+		<threshold_high>54</threshold_high>
+		<area_min>1404</area_min>
+		<area_max>20000</area_max>
+		<distance_sensitivity>10</distance_sensitivity>
+		<velo_sensitivity>0.01</velo_sensitivity>
+		<persistence>15</persistence>
+		<max_distance>32</max_distance>
+		<deadzone_width>0.05</deadzone_width>
+		<deadzone_height>0</deadzone_height>
+		<send_image>1</send_image>
+	</cvtracker>
+</gui>

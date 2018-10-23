@@ -1,0 +1,3 @@
+ofxGPIO
+ofxXmlSettings
+ofxOsc

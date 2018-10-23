@@ -1,0 +1,28 @@
+{
+    "settings": {
+        "draw_to_screen": "1", 
+        "kinect_tilt": "10",
+        "cvtracker": {
+            "area_max": "15000",
+            "area_min": "100",
+            "background_subtraction": "0",
+            "send_image": "1",
+            "max_distance": "32",
+            "persistence": "15",
+            "threshold_high": "250",
+            "threshold_low": "100",
+            "update_sensitivity": "10",
+            "deadzone_width":"0",
+            "deadzone_height" : "0"
+        },
+        "network": {
+            "client_ip": "169.254.0.1",
+            "ports": {
+                "tracking_send": "12345",
+                "image_send": "4242",
+                "sync_send": "4243",
+                "sync_receive": "4244"
+            }
+        }
+    }
+}
