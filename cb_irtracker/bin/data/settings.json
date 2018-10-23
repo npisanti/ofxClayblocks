@@ -1,6 +1,6 @@
 {
     "settings": {
-        "draw_to_screen": "0", 
+        "draw_to_screen": "0",
         "camera": {
             "width": "1024",
             "height": "768",
@@ -8,7 +8,7 @@
             "use_red_channel": "0",
             "saturation": "0",
             "sharpness": "0",
-            "contrast": "45",
+            "contrast": "50",
             "brightness": "60",
             "auto_white_balance_mode": "7",
             "exposure_mode": "2"
@@ -29,7 +29,7 @@
             "deadzone_height" : "0"
         },
         "network": {
-            "client_ip": "169.254.0.1",
+            "client_ip": "192.168.0.102",
             "ports": {
                 "osc_send": "12345",
                 "sync_send": "4243",

@@ -1,7 +1,7 @@
 capacitive
 ==============
 
-Device to send OSC messages when a capacitive sensor is touched. You need an Adafruit MPR121 capaciive hat.
+Device to send OSC messages when a capacitive sensor is touched. You need an Adafruit MPR121 capacitive hat.
 
 usage 
 ```
