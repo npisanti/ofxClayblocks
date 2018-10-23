@@ -2,15 +2,15 @@ ofxClayblocks
 ==============
 `ofxClayblocks` is a collection of devices that send and receive OSC messages over the network. Most of them are raspberry pi based and convert sensors reading to OSC messages or control actuators by receiving OSC messages.
 
-It includes:
+The server apps are:
 - `cb_accelerometer` runs on your android phones and send accelerometer data
 - `cb_capacitive` : Adafruit MPR121 capacitive sensing
-- `cb_irtracker` : blob detection with pimoroni fisheye IR camera
-- `cb_kinectracker` : blob detection with the kinect
+- `cb_irtracker` : cv blobs detection with pimoroni fisheye IR camera
+- `cb_kinectracker` : cv blobs detection with the kinect
 - `cb_relaybox` : controls relay modules
 - `cb_rpiezos` : piezos sensors device
 
-And relative openFrameworks receiver classes to have a fast to use client side API. The `ofx::clayblocks::cvtracker` class deals both with the IR and kinect trackers.
+Relative openFrameworks receiver classes to have a fast to use client side API are also included. The `ofx::clayblocks::cvtracker` class deals both with the IR and kinect trackers.
 
 Go into the individual folders for usage, pictures and building instructions.
 
