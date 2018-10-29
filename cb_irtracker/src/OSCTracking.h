@@ -30,7 +30,6 @@ public:
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
         ofParameter<float> minX, maxX, minY, maxY;
-        ofParameter<bool> remap;
         ofParameter<bool> sendContours;
         ofParameter<float> simplifyContours;
         ofParameter<int> sendImage;

@@ -33,7 +33,6 @@ np::helper::OSCTracking::OSCTracking(){
         parameters.add( maxX.set("max X", 1.0f, 0.0f, 1.0f) );
         parameters.add( minY.set("min Y", 0.0f, 0.0f, 1.0f) );
         parameters.add( maxY.set("max Y", 1.0f, 0.0f, 1.0f) );
-        parameters.add( remap.set("remap coords", false) );
         parameters.add( sendImage.set("send image", 0, 0, 2) );
 
     network.setName("network");
@@ -162,8 +161,6 @@ void np::helper::OSCTracking::doBlobs(){
     float x1 = maxX*width;
     float y0 = minY*height;
     float y1 = maxY*height;
-    float rx = abs( x1-x0 );
-    float ry = abs( y1-y0 );
 
     for ( auto & blob : blobs ){ blob.found = false; }
 
@@ -224,95 +221,48 @@ void np::helper::OSCTracking::doBlobs(){
         }
     }
 
-
     // send all the messages for the blobs to update
-    if( remap ){
-        for( auto & blob : blobs ){
-            if( blob.update ){
-                ofxOscMessage m;
+    for( auto & blob : blobs ){
+        if( blob.update ){
+            ofxOscMessage m;
 
-                m.setAddress( "/cvtracker/blobs/update" );
+            m.setAddress( "/cvtracker/blobs/update" );
 
-                m.addIntArg( blob.label );
+            m.addIntArg( blob.label );
 
-                // normalized coords
-                m.addFloatArg( ofMap( blob.center.x, x0, x1, 0.0f, 1.0f ) );
-                m.addFloatArg( ofMap( blob.center.y, y0, y1, 0.0f, 1.0f ) );
+            // normalized coords
+            m.addFloatArg( blob.center.x * divideW );
+            m.addFloatArg( blob.center.y * divideH );
 
-                // velocities
-                m.addFloatArg( ofMap( blob.velocity.x, x0, x1, 0.0f, 1.0f ) );
-                m.addFloatArg( ofMap( blob.velocity.y, y0, y1, 0.0f, 1.0f ) );
+            // velocities
+            m.addFloatArg( blob.velocity.x );
+            m.addFloatArg( blob.velocity.y );
 
-                // normalized bounding boundaries
-                m.addFloatArg( ofMap( blob.boundaries.x, x0, x1, 0.0f, 1.0f ) );
-                m.addFloatArg( ofMap( blob.boundaries.y, y0, y1, 0.0f, 1.0f ) );
-                m.addFloatArg( ofMap( blob.boundaries.width, 0.0f, rx, 0.0f, 1.0f ) );
-                m.addFloatArg( ofMap( blob.boundaries.height, 0.0f, ry, 0.0f, 1.0f ) );
+            // normalized bounding boundaries
+            m.addFloatArg( blob.boundaries.x * divideW);
+            m.addFloatArg( blob.boundaries.y * divideH);
+            m.addFloatArg( blob.boundaries.width * divideW);
+            m.addFloatArg( blob.boundaries.height * divideH);
 
-                if( sendContours ){
-                    ofPolyline simplified = blob.contour;
-                    float amt = (simplifyContours.get() > 1.0f) ? 1.0f : simplifyContours.get();
-                    simplified.simplify( amt );
+            if( sendContours ){
+                ofPolyline simplified = blob.contour;
+                float amt = (simplifyContours.get() > 1.0f) ? 1.0f : simplifyContours.get();
+                simplified.simplify( amt );
 
-                    int step = ofMap( simplifyContours, 1.0f, 2.0f, 1, 8, true);
+                int step = ofMap( simplifyContours, 1.0f, 2.0f, 1, 8, true);
 
-                    auto & vertices = simplified.getVertices();
-                    for( size_t i=0; i<vertices.size(); i+=step ){
-                        m.addFloatArg( ofMap( vertices[i].x, x0, x1, 0.0f, 1.0f )  );
-                        m.addFloatArg( ofMap( vertices[i].y, y0, y1, 0.0f, 1.0f ) );
-                    }
+                auto & vertices = simplified.getVertices();
+                for( size_t i=0; i<vertices.size(); i+=step ){
+                    m.addFloatArg( vertices[i].x * divideW );
+                    m.addFloatArg( vertices[i].y * divideH );
                 }
-
-                sender.sendMessage(m, false);
-
-                blob.update = false;
             }
-        }
-    }else{
-        for( auto & blob : blobs ){
-            if( blob.update ){
-                ofxOscMessage m;
 
-                m.setAddress( "/cvtracker/blobs/update" );
+            sender.sendMessage(m, false);
 
-                m.addIntArg( blob.label );
-
-                // normalized coords
-                m.addFloatArg( blob.center.x * divideW );
-                m.addFloatArg( blob.center.y * divideH );
-
-                // velocities
-                m.addFloatArg( blob.velocity.x );
-                m.addFloatArg( blob.velocity.y );
-
-                // normalized bounding boundaries
-                m.addFloatArg( blob.boundaries.x * divideW);
-                m.addFloatArg( blob.boundaries.y * divideH);
-                m.addFloatArg( blob.boundaries.width * divideW);
-                m.addFloatArg( blob.boundaries.height * divideH);
-
-                if( sendContours ){
-                    ofPolyline simplified = blob.contour;
-                    float amt = (simplifyContours.get() > 1.0f) ? 1.0f : simplifyContours.get();
-                    simplified.simplify( amt );
-
-                    int step = ofMap( simplifyContours, 1.0f, 2.0f, 1, 8, true);
-
-                    auto & vertices = simplified.getVertices();
-                    for( size_t i=0; i<vertices.size(); i+=step ){
-                        m.addFloatArg( vertices[i].x * divideW );
-                        m.addFloatArg( vertices[i].y * divideH );
-                    }
-                }
-
-                sender.sendMessage(m, false);
-
-                blob.update = false;
-            }
+            blob.update = false;
         }
     }
-
-
 }
 
 void np::helper::OSCTracking::onBGSubtractionToggle( bool & value ){

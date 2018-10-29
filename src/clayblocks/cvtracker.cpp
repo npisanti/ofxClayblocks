@@ -14,34 +14,45 @@ ofx::clayblocks::cvtracker::Blob::Blob(){
 }
 
 ofx::clayblocks::cvtracker::cvtracker(){
-    parameters.setName( "cvtracker");
-        parameters.add( doBackgroundSubtraction.set("background subtraction", false) );
-        parameters.add( denoise.set("denoise", false) );
-        parameters.add( low.set("threshold low", 0, 0, 255) );
-        parameters.add( high.set("threshold high", 255, 0, 255) );
-        parameters.add( minArea.set("area min", 20, 1, 25000) );
-        parameters.add( maxArea.set("area max", 10000, 1, 50000) );;
-        parameters.add( persistence.set("persistence", 15, 1, 100) );
-        parameters.add( maxDistance.set("max distance", 32, 1, 100) );
-        parameters.add( distSensitivity.set("distance sensitivity", 10.0f, 1.0f, 80.0f) );
-        parameters.add( veloSensitivity.set("velo sensitivity", 0.01f, 0.00001f, 1.0f) );
-        parameters.add( sendContours.set( "send contours", false ) );
-        parameters.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
-        parameters.add( minX.set("min X", 0.0f, 0.0f, 1.0f) );
-        parameters.add( maxX.set("max X", 1.0f, 0.0f, 1.0f) );
-        parameters.add( minY.set("min Y", 0.0f, 0.0f, 1.0f) );
-        parameters.add( maxY.set("max Y", 1.0f, 0.0f, 1.0f) );
-        parameters.add( remap.set("remap coords", false) );
-        parameters.add( sendImage.set("send image", 0, 0, 2) );
 
-        t0 = 0.0f;
-    simulation.setName( "cvtracker sim" );
+    parameters.setName( "cvtracker client" );
+
+    tracker.setName( "cvtracker");
+        tracker.add( doBackgroundSubtraction.set("background subtraction", false) );
+        tracker.add( denoise.set("denoise", false) );
+        tracker.add( low.set("threshold low", 0, 0, 255) );
+        tracker.add( high.set("threshold high", 255, 0, 255) );
+        tracker.add( minArea.set("area min", 20, 1, 5000) );
+        tracker.add( maxArea.set("area max", 15000, 1, 25000) );;
+        tracker.add( persistence.set("persistence", 15, 1, 100) );
+        tracker.add( maxDistance.set("max distance", 32, 1, 100) );
+        tracker.add( distSensitivity.set("distance sensitivity", 10.0f, 1.0f, 80.0f) );
+        tracker.add( veloSensitivity.set("velo sensitivity", 0.01f, 0.00001f, 1.0f) );
+        tracker.add( sendContours.set( "send contours", false ) );
+        tracker.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
+        tracker.add( minX.set("min X", 0.0f, 0.0f, 1.0f) );
+        tracker.add( maxX.set("max X", 1.0f, 0.0f, 1.0f) );
+        tracker.add( minY.set("min Y", 0.0f, 0.0f, 1.0f) );
+        tracker.add( maxY.set("max Y", 1.0f, 0.0f, 1.0f) );
+        tracker.add( sendImage.set("send image", 0, 0, 2) );
+    parameters.add( tracker );
+
+    simulation.setName( "simulation" );
         simulation.add( simulate.set("simulate", false) );
-        simulation.add( simulatedBlobs.set("simulated blobs", 1, 1, 10) );
+        simulation.add( simulatedBlobs.set("simulated blobs", 1, 0, 10) );
         simulation.add( speed.set("speed", 0.035f, 0.0f, 0.300f) );
+    t0 = 0.0f;
+    parameters.add( simulation );
+
+    simulate.addListener( this, &ofx::clayblocks::cvtracker::onSimulate );
 
 }
 
+void ofx::clayblocks::cvtracker::onSimulate( bool & value ){
+    if( ! simulate ){
+        blobs.clear();
+    }
+}
 
 void ofx::clayblocks::cvtracker::setup( int oscPort, std::string serverIp, int syncReceivePort, int syncSendPort ){
 
@@ -52,7 +63,7 @@ void ofx::clayblocks::cvtracker::setup( int oscPort, std::string serverIp, int s
 
     oscReceiver.setup( oscPort );
 
-    sync.setup( parameters, syncReceivePort, serverIp, syncSendPort );
+    sync.setup( tracker, syncReceivePort, serverIp, syncSendPort );
 
     receivedImage.allocate( BUFFERW, BUFFERH, OF_IMAGE_COLOR );
     bImageReceived = false;
@@ -155,14 +166,6 @@ void ofx::clayblocks::cvtracker::updateBlob( Blob & blob, ofxOscMessage & m ){
 
 void ofx::clayblocks::cvtracker::draw( int x, int y, int w, int h ){
 
-    float x0 = minX*w;
-    float x1 = maxX*w;
-    float y0 = minY*h;
-    float y1 = maxY*h;
-    float rx = abs( x1-x0 );
-    float ry = abs( y1-y0 );
-
-
     ofPushMatrix();
     ofPushStyle();
         ofTranslate(x, y );
@@ -180,67 +183,35 @@ void ofx::clayblocks::cvtracker::draw( int x, int y, int w, int h ){
 
         ofSetColor( 255, 0, 0 );
 
-        if( remap ){
-            if( sendContours ){
-                for( auto & blob : blobs ){
-                    ofFill();
-                    ofDrawCircle( x0 + blob.position.x * rx, y0 + blob.position.y * ry, 5 );
-                    ofNoFill();
+        if( sendContours ){
+            for( auto & blob : blobs ){
+                ofFill();
+                ofDrawCircle( blob.position.x * w, blob.position.y * h, 5 );
+                ofNoFill();
 
-                    auto & vertices = blob.contour.getVertices();
-                    ofBeginShape();
-                    for(size_t i=0; i<vertices.size(); ++i){
-                        ofVertex( x0 + vertices[i].x * rx, y0 + vertices[i].y * ry);
-                    }
-                    ofEndShape( true );
-                    ofDrawBitmapString( ofToString(vertices.size()), x0 + blob.position.x * rx, y0 + blob.position.y * ry);
+                auto & vertices = blob.contour.getVertices();
+                ofBeginShape();
+                for(size_t i=0; i<vertices.size(); ++i){
+                    ofVertex( vertices[i].x*w, vertices[i].y*h);
+                }
+                ofEndShape( true );
+                ofDrawBitmapString( ofToString(vertices.size()), blob.position.x * w, blob.position.y * h);
 
-                    auto dest = blob.position + blob.velocity * 0.004f;
-                    ofDrawLine( x0 + blob.position.x * rx, y0 + blob.position.y * ry, x0 + dest.x * rx, y0 + dest.y * ry );
-                }
-            }else{
-                for( auto & blob : blobs ){
-                    ofFill();
-                    ofDrawCircle( x0 + blob.position.x * rx, y0 + blob.position.y * ry, 5 );
-                    ofNoFill();
-                    ofDrawRectangle( x0 + blob.boundaries.x * rx, y0 + blob.boundaries.y * ry,
-                                    blob.boundaries.width * rx, blob.boundaries.height * ry );
-                    auto dest = blob.position + blob.velocity * 0.004f;
-                    ofDrawLine( x0 + blob.position.x * rx, y0 + blob.position.y * ry, x0 + dest.x * rx, y0 + dest.y * ry );
-                }
+                auto dest = blob.position + blob.velocity * 0.004f;
+                ofDrawLine( blob.position.x * w, blob.position.y * h, dest.x * w, dest.y * h );
             }
         }else{
-            if( sendContours ){
-                for( auto & blob : blobs ){
-                    ofFill();
-                    ofDrawCircle( blob.position.x * w, blob.position.y * h, 5 );
-                    ofNoFill();
-
-                    auto & vertices = blob.contour.getVertices();
-                    ofBeginShape();
-                    for(size_t i=0; i<vertices.size(); ++i){
-                        ofVertex( vertices[i].x*w, vertices[i].y*h);
-                    }
-                    ofEndShape( true );
-                    ofDrawBitmapString( ofToString(vertices.size()), blob.position.x * w, blob.position.y * h);
-
-                    auto dest = blob.position + blob.velocity * 0.004f;
-                    ofDrawLine( blob.position.x * w, blob.position.y * h, dest.x * w, dest.y * h );
-                }
-            }else{
-                for( auto & blob : blobs ){
-                    ofFill();
-                    ofDrawCircle( blob.position.x * w, blob.position.y * h, 5 );
-                    ofNoFill();
-                    ofDrawRectangle( blob.boundaries.x * w, blob.boundaries.y * h,
-                                    blob.boundaries.width * w, blob.boundaries.height * h );
-                    auto dest = blob.position + blob.velocity * 0.004f;
-                    ofDrawLine( blob.position.x * w, blob.position.y * h, dest.x * w, dest.y * h );
-                }
+            for( auto & blob : blobs ){
+                ofFill();
+                ofDrawCircle( blob.position.x * w, blob.position.y * h, 5 );
+                ofNoFill();
+                ofDrawRectangle( blob.boundaries.x * w, blob.boundaries.y * h,
+                                blob.boundaries.width * w, blob.boundaries.height * h );
+                auto dest = blob.position + blob.velocity * 0.004f;
+                ofDrawLine( blob.position.x * w, blob.position.y * h, dest.x * w, dest.y * h );
             }
         }
-
-
+    
         ofSetColor( 150, 40, 40 );
         ofDrawLine( w*minX, 0, w*minX, h );
         ofDrawLine( w*maxX, 0, w*maxX, h );

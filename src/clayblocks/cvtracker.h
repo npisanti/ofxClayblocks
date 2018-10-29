@@ -31,6 +31,8 @@ public:
     std::vector<Blob> blobs;
 
     ofParameterGroup parameters;
+
+    ofParameterGroup tracker;
         ofParameter<bool> doBackgroundSubtraction;
         ofParameter<bool> denoise;
         ofParameter<int> low;
@@ -42,7 +44,6 @@ public:
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
         ofParameter<float> minX, maxX, minY, maxY;
-        ofParameter<bool> remap;
         ofParameter<bool> sendContours;
         ofParameter<float> simplifyContours;
         ofParameter<int> sendImage;
@@ -54,7 +55,8 @@ public:
 
 private:
     void updateBlob( Blob & blob, ofxOscMessage & m );
-
+    void onSimulate( bool & value );
+    
     ofxOscReceiver oscReceiver;
     ofxOscParameterSync sync;
 
