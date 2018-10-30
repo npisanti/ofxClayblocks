@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "clayblocks/rpiezos.h"
+#include "clayblocks/RPiezos.h"
 
 class ofApp : public ofBaseApp{
 	public:
@@ -23,6 +23,6 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-        ofx::clayblocks::rpiezos piezos;
+        ofx::clayblocks::RPiezos piezos;
 
 };

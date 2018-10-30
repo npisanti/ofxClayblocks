@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "clayblocks/accelerometer.h"
+#include "clayblocks/Accelerometer.h"
 #include "ofxGui.h"
 
 class ofApp : public ofBaseApp{
@@ -24,7 +24,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-        ofx::clayblocks::accelerometer phone;
+        ofx::clayblocks::Accelerometer phone;
 
         ofxPanel gui;
 

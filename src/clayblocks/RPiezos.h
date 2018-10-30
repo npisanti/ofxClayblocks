@@ -9,10 +9,10 @@
 
 namespace ofx { namespace clayblocks {
 
-class rpiezos : public ofThread {
+class RPiezos : public ofThread {
 
 public:
-	~rpiezos();
+	~RPiezos();
 
     void start( int port, std::string oscDevice="/piezos" );
     void stop();

@@ -1,10 +1,10 @@
 
-#include "cvtracker.h"
+#include "CvTracker.h"
 
 #define BUFFERW 160
 #define BUFFERH 120
 
-ofx::clayblocks::cvtracker::Blob::Blob(){
+ofx::clayblocks::CvTracker::Blob::Blob(){
     label = 0;
     position.x = -1.0f;
     position.y = -1.0f;
@@ -13,9 +13,9 @@ ofx::clayblocks::cvtracker::Blob::Blob(){
     boundaries = ofRectangle( 0, 0, 0, 0 );
 }
 
-ofx::clayblocks::cvtracker::cvtracker(){
+ofx::clayblocks::CvTracker::CvTracker(){
 
-    parameters.setName( "cvtracker client" );
+    parameters.setName( "CvTracker" );
 
     tracker.setName( "cvtracker");
         tracker.add( doBackgroundSubtraction.set("background subtraction", false) );
@@ -44,22 +44,22 @@ ofx::clayblocks::cvtracker::cvtracker(){
     t0 = 0.0f;
     parameters.add( simulation );
 
-    simulate.addListener( this, &ofx::clayblocks::cvtracker::onSimulate );
+    simulate.addListener( this, &ofx::clayblocks::CvTracker::onSimulate );
 
 }
 
-void ofx::clayblocks::cvtracker::onSimulate( bool & value ){
+void ofx::clayblocks::CvTracker::onSimulate( bool & value ){
     if( ! simulate ){
         blobs.clear();
     }
 }
 
-void ofx::clayblocks::cvtracker::setup( int oscPort, std::string serverIp, int syncReceivePort, int syncSendPort ){
+void ofx::clayblocks::CvTracker::setup( int oscPort, std::string serverIp, int syncReceivePort, int syncSendPort ){
 
     blobs.reserve( 128 );
 
-    std::cout<<"[receiver] listening for tracking OSC on port "<<oscPort<<"\n";
-    std::cout<<"[receiver] syncing parameters to "<<serverIp<<" with ports "<<syncSendPort<<" (send) and "<<syncReceivePort<<" (receive) \n";
+    std::cout<<"[CvTracker client] listening for tracking OSC on port "<<oscPort<<"\n";
+    std::cout<<"[CvTracker client] syncing parameters to "<<serverIp<<" with ports "<<syncSendPort<<" (send) and "<<syncReceivePort<<" (receive) \n";
 
     oscReceiver.setup( oscPort );
 
@@ -70,7 +70,7 @@ void ofx::clayblocks::cvtracker::setup( int oscPort, std::string serverIp, int s
 }
 
 
-void ofx::clayblocks::cvtracker::update(){
+void ofx::clayblocks::CvTracker::update(){
 
     if( ! simulate ){
         sync.update();
@@ -80,7 +80,7 @@ void ofx::clayblocks::cvtracker::update(){
             oscReceiver.getNextMessage(m);
 
             // getting blobs
-            if( m.getAddress() == "/cvtracker/blobs/update" ){
+            if( m.getAddress() == "/CvTracker/blobs/update" ){
 
                 bool insert = true;
 
@@ -99,7 +99,7 @@ void ofx::clayblocks::cvtracker::update(){
                     updateBlob( blob, m );
                 }
 
-            } else if( m.getAddress() == "/cvtracker/blobs/delete" ){
+            } else if( m.getAddress() == "/CvTracker/blobs/delete" ){
 
                 unsigned int label = m.getArgAsInt32( 0 );
 
@@ -110,7 +110,7 @@ void ofx::clayblocks::cvtracker::update(){
                     }
                 }
 
-            } else if(m.getAddress() == "/cvtracker/image"){ // getting image
+            } else if(m.getAddress() == "/CvTracker/image"){ // getting image
 
                 char* data = m.getArgAsBlob(0).getData();
                 auto & pixels = receivedImage.getPixels();
@@ -147,7 +147,7 @@ void ofx::clayblocks::cvtracker::update(){
 
 }
 
-void ofx::clayblocks::cvtracker::updateBlob( Blob & blob, ofxOscMessage & m ){
+void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage & m ){
 
     blob.position.x = m.getArgAsFloat( 1 );
     blob.position.y = m.getArgAsFloat( 2 );
@@ -164,7 +164,7 @@ void ofx::clayblocks::cvtracker::updateBlob( Blob & blob, ofxOscMessage & m ){
     }
 }
 
-void ofx::clayblocks::cvtracker::draw( int x, int y, int w, int h ){
+void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
 
     ofPushMatrix();
     ofPushStyle();

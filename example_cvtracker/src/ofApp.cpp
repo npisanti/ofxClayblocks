@@ -7,20 +7,19 @@ void ofApp::setup(){
 	ofSetFrameRate(60); // run at 60 fps
 	ofSetVerticalSync(true);
 
-    receiver.setup( 12345, "192.168.0.42" );
+    tracker.setup( 12345, "192.168.0.42" );
 
     gui.setup("gui", "settings.xml", ofGetWidth()-220, 20 );
-    gui.add( receiver.parameters );
+    gui.add( tracker.parameters );
 
     // changes made here will be reflected on the server device
-    receiver.sendImage = 1;
+    tracker.sendImage = 1;
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    receiver.update();
-    //receiver.simulate();
+    tracker.update();
 }
 
 
@@ -29,7 +28,7 @@ void ofApp::draw(){
 
     ofBackground( 0 );
 
-    receiver.draw( 0, 0 );
+    tracker.draw( 0, 0 );
 
     gui.draw();
 }

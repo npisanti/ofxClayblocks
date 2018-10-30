@@ -1,9 +1,9 @@
 
-#include "accelerometer.h"
+#include "Accelerometer.h"
 
 #define ACCEL_AVG_MAX_FRAMES 200
 
-ofx::clayblocks::accelerometer::accelerometer(){
+ofx::clayblocks::Accelerometer::Accelerometer(){
 	x = 0.0f;
 	y = 0.0f;
 	z = 0.0f;
@@ -19,7 +19,7 @@ ofx::clayblocks::accelerometer::accelerometer(){
 
     vindex = 0;
 
-    parameters.setName( "accelerometer" );
+    parameters.setName( "Accelerometer" );
         parameters.add( averageFrames.set("average frames", 121, 2, ACCEL_AVG_MAX_FRAMES ));
         parameters.add( easing.set("easing", 0.0f, 0.0f, 1.0f) );
         parameters.add( xMin.set("x min", -8.0f, 0.0f, -10.0f) );
@@ -31,14 +31,14 @@ ofx::clayblocks::accelerometer::accelerometer(){
 
 }
 
-ofx::clayblocks::accelerometer::~accelerometer(){
+ofx::clayblocks::Accelerometer::~Accelerometer(){
 	if(isThreadRunning()){
         stopThread();
     }
     ofSleepMillis(50);
 }
 
-void ofx::clayblocks::accelerometer::start( int port, std::string oscDevice ){
+void ofx::clayblocks::Accelerometer::start( int port, std::string oscDevice ){
 
     deviceName = oscDevice;
     if(deviceName.substr(0, 1)!="/"){
@@ -49,7 +49,7 @@ void ofx::clayblocks::accelerometer::start( int port, std::string oscDevice ){
     yname = deviceName + "/ay";
     zname = deviceName + "/az";
 
-	std::cout << "[ofx::clayblocks::accelerometer] listening for phone accelerometer OSC messages on port "<<port<<"\n";
+	std::cout << "[ofx::clayblocks::Accelerometer] listening for phone Accelerometer OSC messages on port "<<port<<"\n";
     oscReceiver.setup( port );
 
     parameters.setName( parameters.getName() + " p" + ofToString( port ) );
@@ -58,7 +58,7 @@ void ofx::clayblocks::accelerometer::start( int port, std::string oscDevice ){
 	startThread();
 }
 
-void ofx::clayblocks::accelerometer::threadedFunction() {
+void ofx::clayblocks::Accelerometer::threadedFunction() {
 
 	while( isThreadRunning() ) {
 
@@ -129,7 +129,7 @@ void ofx::clayblocks::accelerometer::threadedFunction() {
 	}
 }
 
-void ofx::clayblocks::accelerometer::draw( int x, int y ) {
+void ofx::clayblocks::Accelerometer::draw( int x, int y ) {
 	ofPushMatrix();
     ofPushStyle();
 	ofTranslate( x, y );
@@ -161,16 +161,16 @@ void ofx::clayblocks::accelerometer::draw( int x, int y ) {
 	ofPopMatrix();
 }
 
-void ofx::clayblocks::accelerometer::stop(){
+void ofx::clayblocks::Accelerometer::stop(){
 	stopThread();
 }
 
-ofParameterGroup & ofx::clayblocks::accelerometer::label( std::string name ){
+ofParameterGroup & ofx::clayblocks::Accelerometer::label( std::string name ){
     parameters.setName( name );
     return parameters;
 }
 
-ofx::clayblocks::accelerometer::accelerometer( const accelerometer & other){
+ofx::clayblocks::Accelerometer::Accelerometer( const Accelerometer & other){
 	x.store( other.x );
 	y.store( other.y );
 	z.store( other.z );
@@ -184,7 +184,7 @@ ofx::clayblocks::accelerometer::accelerometer( const accelerometer & other){
 	az_z1 = other.az_z1;
 	vindex = other.vindex;
 
-    parameters.setName( "accelerometer" );
+    parameters.setName( "Accelerometer" );
         parameters.add( averageFrames.set("average frames", other.averageFrames, 2, ACCEL_AVG_MAX_FRAMES ));
         parameters.add( easing.set("easing", other.easing, 0.0f, 1.0f) );
         parameters.add( xMin.set("x min", other.xMin, 0.0f, -10.0f) );
@@ -195,7 +195,7 @@ ofx::clayblocks::accelerometer::accelerometer( const accelerometer & other){
         parameters.add( zMax.set("z max", other.zMax, 0.0f,  10.0f) );
 }
 
-ofx::clayblocks::accelerometer::accelerometer( accelerometer && other){
+ofx::clayblocks::Accelerometer::Accelerometer( Accelerometer && other){
 	x.store( other.x );
 	y.store( other.y );
 	z.store( other.z );
@@ -209,7 +209,7 @@ ofx::clayblocks::accelerometer::accelerometer( accelerometer && other){
 	az_z1 = other.az_z1;
 	vindex = other.vindex;
 
-    parameters.setName( "accelerometer" );
+    parameters.setName( "Accelerometer" );
         parameters.add( averageFrames.set("average frames", other.averageFrames, 2, ACCEL_AVG_MAX_FRAMES ));
         parameters.add( easing.set("easing", other.easing, 0.0f, 1.0f) );
         parameters.add( xMin.set("x min", other.xMin, 0.0f, -10.0f) );
@@ -220,7 +220,7 @@ ofx::clayblocks::accelerometer::accelerometer( accelerometer && other){
         parameters.add( zMax.set("z max", other.zMax, 0.0f,  10.0f) );
 }
 
-ofx::clayblocks::accelerometer & ofx::clayblocks::accelerometer::operator= (const accelerometer& other){
+ofx::clayblocks::Accelerometer & ofx::clayblocks::Accelerometer::operator= (const Accelerometer& other){
 	x.store( other.x );
 	y.store( other.y );
 	z.store( other.z );
@@ -234,7 +234,7 @@ ofx::clayblocks::accelerometer & ofx::clayblocks::accelerometer::operator= (cons
 	az_z1 = other.az_z1;
 	vindex = other.vindex;
 
-    parameters.setName( "accelerometer" );
+    parameters.setName( "Accelerometer" );
         parameters.add( averageFrames.set("average frames", other.averageFrames, 2, ACCEL_AVG_MAX_FRAMES ));
         parameters.add( easing.set("easing", other.easing, 0.0f, 1.0f) );
         parameters.add( xMin.set("x min", other.xMin, 0.0f, -10.0f) );
@@ -247,7 +247,7 @@ ofx::clayblocks::accelerometer & ofx::clayblocks::accelerometer::operator= (cons
 	return *this;
 }
 
-ofx::clayblocks::accelerometer & ofx::clayblocks::accelerometer::operator= (accelerometer&& other) noexcept {
+ofx::clayblocks::Accelerometer & ofx::clayblocks::Accelerometer::operator= (Accelerometer&& other) noexcept {
 	x.store( other.x );
 	y.store( other.y );
 	z.store( other.z );
@@ -261,7 +261,7 @@ ofx::clayblocks::accelerometer & ofx::clayblocks::accelerometer::operator= (acce
 	az_z1 = other.az_z1;
 	vindex = other.vindex;
 
-    parameters.setName( "accelerometer" );
+    parameters.setName( "Accelerometer" );
         parameters.add( averageFrames.set("average frames", other.averageFrames, 2, ACCEL_AVG_MAX_FRAMES ));
         parameters.add( easing.set("easing", other.easing, 0.0f, 1.0f) );
         parameters.add( xMin.set("x min", other.xMin, 0.0f, -10.0f) );

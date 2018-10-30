@@ -1,8 +1,8 @@
 
-#include "rpiezos.h"
+#include "RPiezos.h"
 
 
-void ofx::clayblocks::rpiezos::start( int port, std::string oscDevice ){
+void ofx::clayblocks::RPiezos::start( int port, std::string oscDevice ){
 
     deviceName = oscDevice;
     if(deviceName.substr(0, 1)!="/"){
@@ -12,7 +12,7 @@ void ofx::clayblocks::rpiezos::start( int port, std::string oscDevice ){
     trigAddress = deviceName + "/trigger";
     envAddress = deviceName + "/envelope";
 
-    std::cout << "[ofx::clayblocks::rpiezos] listening for piezo OSC messages on port "<<port<<"\n";
+    std::cout << "[ofx::clayblocks::RPiezos] listening for piezo OSC messages on port "<<port<<"\n";
 	oscReceiver.setup( port );
 
 	ofSleepMillis(50);
@@ -24,11 +24,11 @@ void ofx::clayblocks::rpiezos::start( int port, std::string oscDevice ){
 	flush();
 }
 
-void ofx::clayblocks::rpiezos::stop(){
+void ofx::clayblocks::RPiezos::stop(){
 	stopThread();
 }
 
-ofx::clayblocks::rpiezos::~rpiezos(){
+ofx::clayblocks::RPiezos::~RPiezos(){
 	if(isThreadRunning()){
         stopThread();
     }
@@ -37,7 +37,7 @@ ofx::clayblocks::rpiezos::~rpiezos(){
 
 
 
-void ofx::clayblocks::rpiezos::threadedFunction() {
+void ofx::clayblocks::RPiezos::threadedFunction() {
 
 	while(isThreadRunning()) {
 		while(oscReceiver.hasWaitingMessages()){
@@ -65,7 +65,7 @@ void ofx::clayblocks::rpiezos::threadedFunction() {
 
 
 
-bool ofx::clayblocks::rpiezos::trigger( int index, float threshold ){
+bool ofx::clayblocks::RPiezos::trigger( int index, float threshold ){
     if( triggers[index] > threshold ){
         triggers[index] = -1.0f;
         return true;
@@ -73,11 +73,11 @@ bool ofx::clayblocks::rpiezos::trigger( int index, float threshold ){
     return false;
 }
 
-float ofx::clayblocks::rpiezos::envelope( int index ){
+float ofx::clayblocks::RPiezos::envelope( int index ){
     return envelopes[index].load();
 }
 
-void ofx::clayblocks::rpiezos::flush() {
+void ofx::clayblocks::RPiezos::flush() {
 	for(int i=0; i<6; ++i){
 		triggers[i] = -1.0f;
 	}
@@ -85,7 +85,7 @@ void ofx::clayblocks::rpiezos::flush() {
 
 
 
-void ofx::clayblocks::rpiezos::drawEnvelopes( int x, int y, int w ) {
+void ofx::clayblocks::RPiezos::drawEnvelopes( int x, int y, int w ) {
 	ofPushMatrix();
 	ofTranslate( x, y + 10 );
 		const int h = 14;
@@ -98,10 +98,10 @@ void ofx::clayblocks::rpiezos::drawEnvelopes( int x, int y, int w ) {
 	ofPopMatrix();
 }
 
-void ofx::clayblocks::rpiezos::logTriggers(){
+void ofx::clayblocks::RPiezos::logTriggers(){
     for( int i=0; i<6; ++i){
         if( trigger(i)){
-            std::cout<<"[ofx::clayblocks::rpiezos] catched trigger on piezo "<<i<<"\n";
+            std::cout<<"[ofx::clayblocks::RPiezos] catched trigger on piezo "<<i<<"\n";
         }
     }
 }

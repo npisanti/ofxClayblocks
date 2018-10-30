@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <gui>
-	<cvtracker_client>
+	<CvTracker>
 		<cvtracker>
 			<background_subtraction>0</background_subtraction>
 			<denoise>0</denoise>
@@ -25,5 +25,5 @@
 			<simulated_blobs>1</simulated_blobs>
 			<speed>0.035</speed>
 		</simulation>
-	</cvtracker_client>
+	</CvTracker>
 </gui>

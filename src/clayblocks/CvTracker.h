@@ -7,10 +7,10 @@
 
 namespace ofx { namespace clayblocks {
 
-class cvtracker{
+class CvTracker{
 
 public:
-    cvtracker();
+    CvTracker();
 
     struct Blob {
         Blob();

@@ -9,15 +9,15 @@
 
 namespace ofx{ namespace clayblocks {
 
-class accelerometer : public ofThread {
+class Accelerometer : public ofThread {
 
 public:
-	accelerometer();
-	accelerometer( const accelerometer & other);
-	accelerometer( accelerometer && other);
-	accelerometer& operator= (const accelerometer& other);
-	accelerometer& operator= (accelerometer&& other) noexcept;
-	~accelerometer();
+	Accelerometer();
+	Accelerometer( const Accelerometer & other);
+	Accelerometer( Accelerometer && other);
+	Accelerometer& operator= (const Accelerometer& other);
+	Accelerometer& operator= (Accelerometer&& other) noexcept;
+	~Accelerometer();
 
 
 	std::atomic<float> x;
