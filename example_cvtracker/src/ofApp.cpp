@@ -8,6 +8,7 @@ void ofApp::setup(){
 	ofSetVerticalSync(true);
 
     tracker.setup( 12345, "192.168.0.42" );
+    tracker.mapToSurface( 640, 480 );
 
     gui.setup("gui", "settings.xml", ofGetWidth()-220, 20 );
     gui.add( tracker.parameters );
@@ -28,7 +29,7 @@ void ofApp::draw(){
 
     ofBackground( 0 );
 
-    tracker.draw( 0, 0 );
+    tracker.draw( 20, 20 );
 
     gui.draw();
 }

@@ -23,10 +23,10 @@ ofx::clayblocks::CvTracker::CvTracker(){
         tracker.add( low.set("threshold low", 0, 0, 255) );
         tracker.add( high.set("threshold high", 255, 0, 255) );
         tracker.add( minArea.set("area min", 20, 1, 5000) );
-        tracker.add( maxArea.set("area max", 15000, 1, 25000) );;
+        tracker.add( maxArea.set("area max", 15000, 1, 50000) );;
         tracker.add( persistence.set("persistence", 15, 1, 100) );
         tracker.add( maxDistance.set("max distance", 32, 1, 100) );
-        tracker.add( distSensitivity.set("distance sensitivity", 10.0f, 1.0f, 80.0f) );
+        tracker.add( distSensitivity.set("distance sensitivity", 10, 0, 80 ) );
         tracker.add( veloSensitivity.set("velo sensitivity", 0.01f, 0.00001f, 1.0f) );
         tracker.add( sendContours.set( "send contours", false ) );
         tracker.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
@@ -45,6 +45,35 @@ ofx::clayblocks::CvTracker::CvTracker(){
     parameters.add( simulation );
 
     simulate.addListener( this, &ofx::clayblocks::CvTracker::onSimulate );
+
+    bRecordAverage = false;
+    recorded.reserve( 128 );
+
+    active = false;
+}
+
+
+void ofx::clayblocks::CvTracker::mapToSurface( int w, int h ){
+
+    mapping.setName( "mapping" );
+    mapping.add( active.set("active", true) );
+    input.setName( "input" );
+        input.add( topX0.set("top x0", 0.0f, 0.0f, 1.0f) );
+        input.add( topX1.set("top x1", 1.0f, 0.0f, 1.0f) );
+        input.add( topY.set("top y", 0.0f, 0.0f, 1.0f) );  
+        input.add( bottomX0.set("bottom x0", 0.0f, 0.0f, 1.0f) );
+        input.add( bottomX1.set("bottom x1", 1.0f, 0.0f, 1.0f) );
+        input.add( bottomY.set("bottom y", 1.0f, 0.0f, 1.0f) );
+    mapping.add( input );
+    
+    output.setName( "output" );
+        output.add( outX.set("x", 0, 0, w) );
+        output.add( outY.set("y", 0, 0, h) );
+        output.add( outW.set("w", w, 0, w) );
+        output.add( outH.set("h", h, 0, h) );
+    mapping.add( output );
+
+    parameters.add( mapping );
 
 }
 
@@ -80,7 +109,7 @@ void ofx::clayblocks::CvTracker::update(){
             oscReceiver.getNextMessage(m);
 
             // getting blobs
-            if( m.getAddress() == "/CvTracker/blobs/update" ){
+            if( m.getAddress() == "/cvtracker/blobs/update" ){
 
                 bool insert = true;
 
@@ -99,7 +128,7 @@ void ofx::clayblocks::CvTracker::update(){
                     updateBlob( blob, m );
                 }
 
-            } else if( m.getAddress() == "/CvTracker/blobs/delete" ){
+            } else if( m.getAddress() == "/cvtracker/blobs/delete" ){
 
                 unsigned int label = m.getArgAsInt32( 0 );
 
@@ -110,7 +139,7 @@ void ofx::clayblocks::CvTracker::update(){
                     }
                 }
 
-            } else if(m.getAddress() == "/CvTracker/image"){ // getting image
+            } else if(m.getAddress() == "/cvtracker/image"){ // getting image
 
                 char* data = m.getArgAsBlob(0).getData();
                 auto & pixels = receivedImage.getPixels();
@@ -145,6 +174,30 @@ void ofx::clayblocks::CvTracker::update(){
         t0 = t1;
     }
 
+    if( bRecordAverage ){
+        glm::vec2 sum( 0, 0 );
+        for( auto & blob : blobs ){
+            sum.x += blob.position.x;
+            sum.y += blob.position.y;
+        }
+        sum.x /= float( blobs.size() );
+        sum.y /= float( blobs.size() );
+        recorded.push_back( sum );
+    }
+}
+
+inline void ofx::clayblocks::CvTracker::doMapping( float & x, float & y ){
+
+    float mapY = ofMap( y, topY, bottomY, 0.0f, 1.0f, true );
+
+    float tx = ofMap( x, topX0, topX1, 0.0f, 1.0f, true );
+    float bx = ofMap( x, bottomX0, bottomX1, 0.0f, 1.0f, true );
+
+    float mapX =  tx*(1.0f-mapY) + bx * mapY;
+
+    x = outX + mapX * outW;
+    y = outY + mapY * outH;
+
 }
 
 void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage & m ){
@@ -162,6 +215,25 @@ void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage & m ){
     for(size_t i = 9; i < m.getNumArgs(); i+=2) {
         blob.contour.addVertex( m.getArgAsFloat(i), m.getArgAsFloat(i+1) );
     }
+
+
+    if( active ){
+        doMapping( blob.position.x, blob.position.y );
+        float blx = blob.boundaries.x;
+        float bly =  blob.boundaries.y;
+        blx += blob.boundaries.width;
+        bly += blob.boundaries.height; 
+        doMapping( blx, bly );
+        doMapping( blob.boundaries.x, blob.boundaries.y );
+        blob.boundaries.width = blx - blob.boundaries.x;
+        blob.boundaries.height = bly - blob.boundaries.y;
+
+        auto & vertices = blob.contour.getVertices();
+        for ( size_t v=0; v<vertices.size(); ++v ){
+            doMapping( vertices[v].x, vertices[v].y );
+        }
+    }
+
 }
 
 void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
@@ -182,36 +254,66 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
         }
 
         ofSetColor( 255, 0, 0 );
+        
+        if( active ){ 
 
-        if( sendContours ){
+            ofSetColor( 0, 255, 255, 100 );
+
             for( auto & blob : blobs ){
+                float pctx = float(blob.position.x - outX) / float(outW); 
+                float pcty = float(blob.position.y - outY) / float(outH);
+
+                float tx = (topX0 * (1.0-pctx) + topX1 * pctx) * w;
+                float bx = (bottomX0 * (1.0-pctx) + bottomX1 * pctx) * w;
+
+                float cy = (topY * (1.0-pcty) + bottomY * pcty) * h;
+                float cx = tx * (1.0-pcty) + bx * pcty;
+
                 ofFill();
-                ofDrawCircle( blob.position.x * w, blob.position.y * h, 5 );
-                ofNoFill();
-
-                auto & vertices = blob.contour.getVertices();
-                ofBeginShape();
-                for(size_t i=0; i<vertices.size(); ++i){
-                    ofVertex( vertices[i].x*w, vertices[i].y*h);
-                }
-                ofEndShape( true );
-                ofDrawBitmapString( ofToString(vertices.size()), blob.position.x * w, blob.position.y * h);
-
-                auto dest = blob.position + blob.velocity * 0.004f;
-                ofDrawLine( blob.position.x * w, blob.position.y * h, dest.x * w, dest.y * h );
+                ofDrawCircle( cx, cy, 7 );
             }
+
+            ofDrawLine( topX0*w, topY*h, topX1*w, topY*h );
+            ofDrawLine( topX0*w, topY*h, bottomX0*w, bottomY*h );
+            ofDrawLine( topX1*w, topY*h, bottomX1*w, bottomY*h );
+            ofDrawLine( bottomX0*w, bottomY*h, bottomX1*w, bottomY*h );
+            
         }else{
-            for( auto & blob : blobs ){
-                ofFill();
-                ofDrawCircle( blob.position.x * w, blob.position.y * h, 5 );
-                ofNoFill();
-                ofDrawRectangle( blob.boundaries.x * w, blob.boundaries.y * h,
-                                blob.boundaries.width * w, blob.boundaries.height * h );
-                auto dest = blob.position + blob.velocity * 0.004f;
-                ofDrawLine( blob.position.x * w, blob.position.y * h, dest.x * w, dest.y * h );
+
+            ofPushMatrix();
+            ofScale( w, h );
+
+            if( sendContours ){
+                for( auto & blob : blobs ){
+                    ofFill();
+                    ofDrawCircle( blob.position.x, blob.position.y, 0.005f );
+                    ofNoFill();
+
+                    auto & vertices = blob.contour.getVertices();
+                    ofBeginShape();
+                    for(size_t i=0; i<vertices.size(); ++i){
+                        ofVertex( vertices[i].x, vertices[i].y);
+                    }
+                    ofEndShape( true );
+                    ofDrawBitmapString( ofToString(vertices.size()), blob.position.x, blob.position.y);
+
+                    auto dest = blob.position + blob.velocity * 0.004f;
+                    ofDrawLine( blob.position.x, blob.position.y, dest.x, dest.y );
+                }
+            }else{
+                for( auto & blob : blobs ){
+                    ofFill();
+                    ofDrawCircle( blob.position.x, blob.position.y, 0.005f );
+                    ofNoFill();
+                    ofDrawRectangle( blob.boundaries.x, blob.boundaries.y,
+                                    blob.boundaries.width, blob.boundaries.height );
+                    auto dest = blob.position + blob.velocity * 0.004f;
+                    ofDrawLine( blob.position.x, blob.position.y, dest.x, dest.y );
+                }
             }
+            ofPopMatrix();            
         }
-    
+
         ofSetColor( 150, 40, 40 );
         ofDrawLine( w*minX, 0, w*minX, h );
         ofDrawLine( w*maxX, 0, w*maxX, h );
@@ -226,7 +328,23 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
     ofPopMatrix();
 }
 
+void ofx::clayblocks::CvTracker::startRecordingAverage(){
+    recorded.clear();
+    bRecordAverage = true;
+}
 
-void remap(){
+void ofx::clayblocks::CvTracker::stopRecordingAverage(){
+    average.x = 0.0f;
+    average.y = 0.0f;
 
+    for( auto & point : recorded ){
+        average.x += point.x;
+        average.y += point.y;
+    }
+
+    average.x /= float( recorded.size() );
+    average.y /= float( recorded.size() );
+
+    recorded.clear();
+    bRecordAverage = false;
 }

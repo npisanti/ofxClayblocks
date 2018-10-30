@@ -25,7 +25,7 @@ np::helper::OSCTracking::OSCTracking(){
         parameters.add( maxArea.set("area max", 20000, 1, 100000) );;
         parameters.add( persistence.set("persistence", 15, 1, 100) );
         parameters.add( maxDistance.set("max distance", 32, 1, 100) );
-        parameters.add( distSensitivity.set("distance sensitivity", 10.0f, 1.0f, 80.0f) );
+        parameters.add( distSensitivity.set("distance sensitivity", 10, 0, 80) );
         parameters.add( veloSensitivity.set("velo sensitivity", 0.01f, 0.00001f, 1.0f) );
         parameters.add( sendContours.set( "send contours", false ) );
         parameters.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
@@ -179,7 +179,7 @@ void np::helper::OSCTracking::doBlobs(){
 
                     if( sendContours ||
                         // check the distance or velocity changed enough
-                        ( glm::distance( blob.center, glm::vec2(finder.getCenter(i).x, finder.getCenter(i).y) ) > distSensitivity ) ||
+                        ( glm::distance( blob.center, glm::vec2(finder.getCenter(i).x, finder.getCenter(i).y) ) > float(distSensitivity) ) ||
                         (glm::distance( blob.velocity, glm::vec2(finder.getVelocity(i)[0], finder.getVelocity(i)[1]) ) > veloSensitivity )
                      ){ // then
                         blob.center.x = finder.getCenter(i).x;

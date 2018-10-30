@@ -39,7 +39,7 @@ public:
         ofParameter<int> high;
         ofParameter<int> minArea;
         ofParameter<int> maxArea;
-        ofParameter<float> distSensitivity;
+        ofParameter<int> distSensitivity;
         ofParameter<float> veloSensitivity;
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
@@ -53,10 +53,33 @@ public:
         ofParameter<int> simulatedBlobs;
         ofParameter<float> speed;
 
+    ofParameterGroup mapping;
+        ofParameter<bool> active;
+        ofParameterGroup input;
+        ofParameter<float> topX0;
+        ofParameter<float> topX1;
+        ofParameter<float> topY; 
+        ofParameter<float> bottomX0;
+        ofParameter<float> bottomX1;
+        ofParameter<float> bottomY;
+        ofParameterGroup output;
+        ofParameter<int> outX;
+        ofParameter<int> outY;
+        ofParameter<int> outW;
+        ofParameter<int> outH;
+
+    void mapToSurface( int w, int h );
+
+    void startRecordingAverage();
+    void stopRecordingAverage();
+
 private:
     void updateBlob( Blob & blob, ofxOscMessage & m );
     void onSimulate( bool & value );
     
+
+    void doMapping( float & x, float & y );
+
     ofxOscReceiver oscReceiver;
     ofxOscParameterSync sync;
 
@@ -64,6 +87,10 @@ private:
     ofImage receivedImage;
 
     float t0;
+
+    bool bRecordAverage;
+    glm::vec2 average;
+    std::vector<glm::vec2> recorded;
 
 };
 

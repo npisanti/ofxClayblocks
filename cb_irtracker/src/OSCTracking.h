@@ -25,7 +25,7 @@ public:
         ofParameter<int> high;
         ofParameter<int> minArea;
         ofParameter<int> maxArea;
-        ofParameter<float> distSensitivity;
+        ofParameter<int> distSensitivity;
         ofParameter<float> veloSensitivity;
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
