@@ -1,6 +1,6 @@
 
 #pragma once
 
-#include "clayblocks/cvtracker.h"
-#include "clayblocks/accelerometer.h"
-#include "clayblocks/rpiezos.h"
+#include "clayblocks/CvTracker.h"
+#include "clayblocks/Accelerometer.h"
+#include "clayblocks/RPiezos.h"
