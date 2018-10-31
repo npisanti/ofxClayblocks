@@ -10,7 +10,7 @@ The server apps are:
 - `cb_relaybox` : controls relay modules
 - `cb_rpiezos` : piezos sensors device
 
-Relative openFrameworks receiver classes to have a fast to use client side API are also included. The `ofx::clayblocks::cvtracker` class deals both with the IR and kinect trackers.
+Relative openFrameworks receiver classes to have a fast to use client side API are also included. The `ofx::clayblocks::CvTracker` class deals both with the IR and kinect trackers.
 
 Go into the individual folders for usage, pictures and building instructions.
 
