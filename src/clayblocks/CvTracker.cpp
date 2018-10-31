@@ -52,18 +52,25 @@ ofx::clayblocks::CvTracker::CvTracker(){
     active = false;
 }
 
+void ofx::clayblocks::CvTracker::onMappingOutChange( int & value ){
+    outX1 = outX + outW;
+    outY1 = outY + outH;
+}
 
 void ofx::clayblocks::CvTracker::mapToSurface( int w, int h ){
+
+    outX.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
+    outY.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
+    outW.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
+    outH.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
 
     mapping.setName( "mapping" );
     mapping.add( active.set("active", true) );
     input.setName( "input" );
-        input.add( topX0.set("top x0", 0.0f, 0.0f, 1.0f) );
-        input.add( topX1.set("top x1", 1.0f, 0.0f, 1.0f) );
-        input.add( topY.set("top y", 0.0f, 0.0f, 1.0f) );  
-        input.add( bottomX0.set("bottom x0", 0.0f, 0.0f, 1.0f) );
-        input.add( bottomX1.set("bottom x1", 1.0f, 0.0f, 1.0f) );
-        input.add( bottomY.set("bottom y", 1.0f, 0.0f, 1.0f) );
+        input.add( mapX0.set("map x0", 0.0f, 0.0f, 1.0f) );
+        input.add( mapX1.set("map x1", 1.0f, 0.0f, 1.0f) );
+        input.add( mapY0.set("map y0", 0.0f, 0.0f, 1.0f) );  
+        input.add( mapY1.set("map y1", 1.0f, 0.0f, 1.0f) );  
     mapping.add( input );
     
     output.setName( "output" );
@@ -73,6 +80,7 @@ void ofx::clayblocks::CvTracker::mapToSurface( int w, int h ){
         output.add( outH.set("h", h, 0, h) );
     mapping.add( output );
 
+    mapping.add( testSize.set("test size", 8, 2, 40) );
     parameters.add( mapping );
 
 }
@@ -188,19 +196,12 @@ void ofx::clayblocks::CvTracker::update(){
 
 inline void ofx::clayblocks::CvTracker::doMapping( float & x, float & y ){
 
-    float mapY = ofMap( y, topY, bottomY, 0.0f, 1.0f, true );
-
-    float tx = ofMap( x, topX0, topX1, 0.0f, 1.0f, true );
-    float bx = ofMap( x, bottomX0, bottomX1, 0.0f, 1.0f, true );
-
-    float mapX =  tx*(1.0f-mapY) + bx * mapY;
-
-    x = outX + mapX * outW;
-    y = outY + mapY * outH;
+    x = ofMap( x, mapX0, mapX1, outX, outX1, true );
+    y = ofMap( y, mapY0, mapY1, outY, outY1, true );
 
 }
 
-void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage & m ){
+inline void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage & m ){
 
     blob.position.x = m.getArgAsFloat( 1 );
     blob.position.y = m.getArgAsFloat( 2 );
@@ -216,17 +217,11 @@ void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage & m ){
         blob.contour.addVertex( m.getArgAsFloat(i), m.getArgAsFloat(i+1) );
     }
 
-
     if( active ){
         doMapping( blob.position.x, blob.position.y );
-        float blx = blob.boundaries.x;
-        float bly =  blob.boundaries.y;
-        blx += blob.boundaries.width;
-        bly += blob.boundaries.height; 
-        doMapping( blx, bly );
         doMapping( blob.boundaries.x, blob.boundaries.y );
-        blob.boundaries.width = blx - blob.boundaries.x;
-        blob.boundaries.height = bly - blob.boundaries.y;
+        blob.boundaries.width *=  outW; 
+        blob.boundaries.height *= outH;
 
         auto & vertices = blob.contour.getVertices();
         for ( size_t v=0; v<vertices.size(); ++v ){
@@ -253,36 +248,13 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
             if( sendImage>0 ) ofDrawBitmapString( "waiting for image blob", x+50, y+50 );
         }
 
-        ofSetColor( 255, 0, 0 );
-        
-        if( active ){ 
 
-            ofSetColor( 0, 255, 255, 100 );
+        ofPushMatrix();
+        ofScale( w, h );
 
-            for( auto & blob : blobs ){
-                float pctx = float(blob.position.x - outX) / float(outW); 
-                float pcty = float(blob.position.y - outY) / float(outH);
-
-                float tx = (topX0 * (1.0-pctx) + topX1 * pctx) * w;
-                float bx = (bottomX0 * (1.0-pctx) + bottomX1 * pctx) * w;
-
-                float cy = (topY * (1.0-pcty) + bottomY * pcty) * h;
-                float cx = tx * (1.0-pcty) + bx * pcty;
-
-                ofFill();
-                ofDrawCircle( cx, cy, 7 );
-            }
-
-            ofDrawLine( topX0*w, topY*h, topX1*w, topY*h );
-            ofDrawLine( topX0*w, topY*h, bottomX0*w, bottomY*h );
-            ofDrawLine( topX1*w, topY*h, bottomX1*w, bottomY*h );
-            ofDrawLine( bottomX0*w, bottomY*h, bottomX1*w, bottomY*h );
+        if( ! active ){
+            ofSetColor( 255, 0, 0 );
             
-        }else{
-
-            ofPushMatrix();
-            ofScale( w, h );
-
             if( sendContours ){
                 for( auto & blob : blobs ){
                     ofFill();
@@ -311,14 +283,30 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
                     ofDrawLine( blob.position.x, blob.position.y, dest.x, dest.y );
                 }
             }
-            ofPopMatrix();            
-        }
 
+        }else{
+
+            ofSetColor( 0, 255, 255, 100 );
+
+            for( auto & blob : blobs ){
+                float cx = ofMap( blob.position.x, outX, outX1, mapX0, mapX1 );
+                float cy = ofMap( blob.position.y, outY, outY1, mapY0, mapY1 );
+
+                ofFill();
+                ofDrawCircle( cx, cy, 0.01f );
+            }
+
+            ofNoFill();
+            ofDrawRectangle( mapX0, mapY0, mapX1-mapX0, mapY1-mapY0 );
+        }
+      
         ofSetColor( 150, 40, 40 );
-        ofDrawLine( w*minX, 0, w*minX, h );
-        ofDrawLine( w*maxX, 0, w*maxX, h );
-        ofDrawLine( 0, h*minY, w, h*minY );
-        ofDrawLine( 0, h*maxY, w, h*maxY );
+        ofDrawLine( minX, 0, minX, 1.0f );
+        ofDrawLine( maxX, 0, maxX, 1.0f );
+        ofDrawLine( 0, minY, 1.0f, minY );
+        ofDrawLine( 0, maxY, 1.0f, maxY );
+
+        ofPopMatrix();   
 
         ofSetColor(255);
         ofNoFill();
@@ -347,4 +335,18 @@ void ofx::clayblocks::CvTracker::stopRecordingAverage(){
 
     recorded.clear();
     bRecordAverage = false;
+}
+
+void ofx::clayblocks::CvTracker::drawMappingTest(){
+    
+    float rectoff = testSize / 4;
+    
+    for( auto & blob : blobs ){
+        float cx = blob.position.x;
+        float cy = blob.position.y;
+
+        ofDrawRectangle( cx-rectoff, outY, rectoff*2, outH );
+        ofDrawRectangle( outX, cy-rectoff, outW, rectoff*2 );
+        ofDrawCircle( cx, cy, testSize );
+    }
 }

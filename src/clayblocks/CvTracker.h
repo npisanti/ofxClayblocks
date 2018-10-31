@@ -56,29 +56,33 @@ public:
     ofParameterGroup mapping;
         ofParameter<bool> active;
         ofParameterGroup input;
-        ofParameter<float> topX0;
-        ofParameter<float> topX1;
-        ofParameter<float> topY; 
-        ofParameter<float> bottomX0;
-        ofParameter<float> bottomX1;
-        ofParameter<float> bottomY;
+        ofParameter<float> mapX0;
+        ofParameter<float> mapX1;
+        ofParameter<float> mapY0;
+        ofParameter<float> mapY1;
         ofParameterGroup output;
         ofParameter<int> outX;
         ofParameter<int> outY;
         ofParameter<int> outW;
         ofParameter<int> outH;
+        ofParameter<float> testSize;
 
     void mapToSurface( int w, int h );
 
     void startRecordingAverage();
     void stopRecordingAverage();
 
+    void drawMappingTest();
+
 private:
     void updateBlob( Blob & blob, ofxOscMessage & m );
     void onSimulate( bool & value );
-    
+    void onMappingOutChange( int & value );
 
     void doMapping( float & x, float & y );
+
+    float outX1;
+    float outY1;
 
     ofxOscReceiver oscReceiver;
     ofxOscParameterSync sync;

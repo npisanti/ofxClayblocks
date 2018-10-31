@@ -2,6 +2,8 @@ ofxClayblocks
 ==============
 `ofxClayblocks` is a collection of devices that send and receive OSC messages over the network. Most of them are raspberry pi based and convert sensors reading to OSC messages or control actuators by receiving OSC messages.
 
+DISCLAIMER: this repository still have to be considered in alpha state, things may change (and improve!), if something doesn't work or it isn't documented please come back in a while! =) 
+
 The server apps are:
 - `cb_accelerometer` runs on your android phones and send accelerometer data
 - `cb_capacitive` : Adafruit MPR121 capacitive sensing
