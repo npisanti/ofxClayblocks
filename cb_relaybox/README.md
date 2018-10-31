@@ -21,5 +21,6 @@ osc=/relay/k7 | gpio=12
 osc=/relay/k8 | gpio=13
 
 ```
-
-![alt tag](https://github.com/npisanti/np-clayblocks/blob/master/relaybox/relays.jpg)  
+<p align="center">
+  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_relaybox/relays.jpg" width="700">
+</p>

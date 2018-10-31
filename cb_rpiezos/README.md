@@ -16,5 +16,5 @@ perfboard prototype:
 
 calibration utility:
 <p align="center">
-  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/tree/master/cb_rpiezos/calibrate_utility.png" width="700">
+  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_rpiezos/calibrate_utility.png" width="700">
 </p>

@@ -20,4 +20,6 @@ the configuration in `bin/data/settings.xml` is loaded.
 
 i2c has to be activated on you raspberry pi using `raspi-config`
 
-![alt tag](https://github.com/npisanti/np-clayblocks/blob/master/capacitive/mpr121.jpg)  
+<p align="center">
+  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_capacitive/mpr121.jpg" width="700">
+</p>
