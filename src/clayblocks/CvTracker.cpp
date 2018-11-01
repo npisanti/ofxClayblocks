@@ -26,14 +26,14 @@ ofx::clayblocks::CvTracker::CvTracker(){
         tracker.add( maxArea.set("area max", 15000, 1, 50000) );;
         tracker.add( persistence.set("persistence", 15, 1, 100) );
         tracker.add( maxDistance.set("max distance", 32, 1, 100) );
-        
-        parameters.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
-        parameters.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
-        parameters.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
-        parameters.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
-        parameters.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
-        parameters.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
-        
+
+        tracker.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
+        tracker.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
+        tracker.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
+        tracker.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
+        tracker.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
+        tracker.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
+
         tracker.add( sendContours.set( "send contours", false ) );
         tracker.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
         tracker.add( sendImage.set("send image", 0, 0, 2) );
@@ -71,10 +71,10 @@ void ofx::clayblocks::CvTracker::mapToSurface( int w, int h ){
     input.setName( "input" );
         input.add( mapX0.set("map x0", 0.0f, 0.0f, 1.0f) );
         input.add( mapX1.set("map x1", 1.0f, 0.0f, 1.0f) );
-        input.add( mapY0.set("map y0", 0.0f, 0.0f, 1.0f) );  
-        input.add( mapY1.set("map y1", 1.0f, 0.0f, 1.0f) );  
+        input.add( mapY0.set("map y0", 0.0f, 0.0f, 1.0f) );
+        input.add( mapY1.set("map y1", 1.0f, 0.0f, 1.0f) );
     mapping.add( input );
-    
+
     output.setName( "output" );
         output.add( outX.set("x", 0, 0, w) );
         output.add( outY.set("y", 0, 0, h) );
@@ -222,7 +222,7 @@ inline void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage &
     if( active ){
         doMapping( blob.position.x, blob.position.y );
         doMapping( blob.boundaries.x, blob.boundaries.y );
-        blob.boundaries.width *=  outW; 
+        blob.boundaries.width *=  outW;
         blob.boundaries.height *= outH;
 
         auto & vertices = blob.contour.getVertices();
@@ -256,7 +256,7 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
 
         if( ! active ){
             ofSetColor( 255, 0, 0 );
-            
+
             if( sendContours ){
                 for( auto & blob : blobs ){
                     ofFill();
@@ -301,14 +301,14 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
             ofNoFill();
             ofDrawRectangle( mapX0, mapY0, mapX1-mapX0, mapY1-mapY0 );
         }
-      
+
         ofSetColor( 150, 40, 40 );
         ofDrawLine( filterMinX, 0, filterMinX, 1.0f );
         ofDrawLine( filterMaxX, 0, filterMaxX, 1.0f );
         ofDrawLine( 0, filterMinY, 1.0f, filterMinY );
         ofDrawLine( 0, filterMaxY, 1.0f, filterMaxY );
 
-        ofPopMatrix();   
+        ofPopMatrix();
 
         ofSetColor(255);
         ofNoFill();
@@ -340,9 +340,9 @@ void ofx::clayblocks::CvTracker::stopRecordingAverage(){
 }
 
 void ofx::clayblocks::CvTracker::drawMappingTest(){
-    
+
     float rectoff = testSize / 4;
-    
+
     for( auto & blob : blobs ){
         float cx = blob.position.x;
         float cy = blob.position.y;
