@@ -26,14 +26,16 @@ ofx::clayblocks::CvTracker::CvTracker(){
         tracker.add( maxArea.set("area max", 15000, 1, 50000) );;
         tracker.add( persistence.set("persistence", 15, 1, 100) );
         tracker.add( maxDistance.set("max distance", 32, 1, 100) );
-        tracker.add( distSensitivity.set("distance sensitivity", 10, 0, 80 ) );
-        tracker.add( veloSensitivity.set("velo sensitivity", 0.01f, 0.00001f, 1.0f) );
+        
+        parameters.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
+        parameters.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
+        parameters.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
+        parameters.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
+        parameters.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
+        parameters.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
+        
         tracker.add( sendContours.set( "send contours", false ) );
         tracker.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
-        tracker.add( minX.set("min X", 0.0f, 0.0f, 1.0f) );
-        tracker.add( maxX.set("max X", 1.0f, 0.0f, 1.0f) );
-        tracker.add( minY.set("min Y", 0.0f, 0.0f, 1.0f) );
-        tracker.add( maxY.set("max Y", 1.0f, 0.0f, 1.0f) );
         tracker.add( sendImage.set("send image", 0, 0, 2) );
     parameters.add( tracker );
 
@@ -301,10 +303,10 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
         }
       
         ofSetColor( 150, 40, 40 );
-        ofDrawLine( minX, 0, minX, 1.0f );
-        ofDrawLine( maxX, 0, maxX, 1.0f );
-        ofDrawLine( 0, minY, 1.0f, minY );
-        ofDrawLine( 0, maxY, 1.0f, maxY );
+        ofDrawLine( filterMinX, 0, filterMinX, 1.0f );
+        ofDrawLine( filterMaxX, 0, filterMaxX, 1.0f );
+        ofDrawLine( 0, filterMinY, 1.0f, filterMinY );
+        ofDrawLine( 0, filterMaxY, 1.0f, filterMaxY );
 
         ofPopMatrix();   
 

@@ -25,11 +25,13 @@ public:
         ofParameter<int> high;
         ofParameter<int> minArea;
         ofParameter<int> maxArea;
-        ofParameter<int> distSensitivity;
-        ofParameter<float> veloSensitivity;
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
-        ofParameter<float> minX, maxX, minY, maxY;
+        
+        ofParameter<int> filterDeltaDistance;
+        ofParameter<float> filterDeltaVelocity;
+        ofParameter<float> filterMinX, filterMaxX, filterMinY, filterMaxY;
+        
         ofParameter<bool> sendContours;
         ofParameter<float> simplifyContours;
         ofParameter<int> sendImage;

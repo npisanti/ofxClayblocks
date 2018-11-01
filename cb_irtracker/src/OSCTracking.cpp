@@ -25,14 +25,17 @@ np::helper::OSCTracking::OSCTracking(){
         parameters.add( maxArea.set("area max", 20000, 1, 100000) );;
         parameters.add( persistence.set("persistence", 15, 1, 100) );
         parameters.add( maxDistance.set("max distance", 32, 1, 100) );
-        parameters.add( distSensitivity.set("distance sensitivity", 10, 0, 80) );
-        parameters.add( veloSensitivity.set("velo sensitivity", 0.01f, 0.00001f, 1.0f) );
+
+        parameters.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
+        parameters.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
+        parameters.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
+        parameters.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
+        parameters.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
+        parameters.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
+
         parameters.add( sendContours.set( "send contours", false ) );
         parameters.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
-        parameters.add( minX.set("min X", 0.0f, 0.0f, 1.0f) );
-        parameters.add( maxX.set("max X", 1.0f, 0.0f, 1.0f) );
-        parameters.add( minY.set("min Y", 0.0f, 0.0f, 1.0f) );
-        parameters.add( maxY.set("max Y", 1.0f, 0.0f, 1.0f) );
+        
         parameters.add( sendImage.set("send image", 0, 0, 2) );
 
     network.setName("network");
@@ -157,10 +160,10 @@ void np::helper::OSCTracking::update( cv::Mat & frame ){
 
 void np::helper::OSCTracking::doBlobs(){
 
-    float x0 = minX*width;
-    float x1 = maxX*width;
-    float y0 = minY*height;
-    float y1 = maxY*height;
+    float x0 = filterMinX*width;
+    float x1 = filterMaxX*width;
+    float y0 = filterMinY*height;
+    float y1 = filterMaxY*height;
 
     for ( auto & blob : blobs ){ blob.found = false; }
 
@@ -179,8 +182,8 @@ void np::helper::OSCTracking::doBlobs(){
 
                     if( sendContours ||
                         // check the distance or velocity changed enough
-                        ( glm::distance( blob.center, glm::vec2(finder.getCenter(i).x, finder.getCenter(i).y) ) > float(distSensitivity) ) ||
-                        (glm::distance( blob.velocity, glm::vec2(finder.getVelocity(i)[0], finder.getVelocity(i)[1]) ) > veloSensitivity )
+                        ( glm::distance( blob.center, glm::vec2(finder.getCenter(i).x, finder.getCenter(i).y) ) > float(filterDeltaDistance) ) ||
+                        (glm::distance( blob.velocity, glm::vec2(finder.getVelocity(i)[0], finder.getVelocity(i)[1]) ) > filterDeltaVelocity )
                      ){ // then
                         blob.center.x = finder.getCenter(i).x;
                         blob.center.y = finder.getCenter(i).y;
