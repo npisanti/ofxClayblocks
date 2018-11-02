@@ -27,11 +27,13 @@ public:
         ofParameter<int> maxArea;
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
-        
+
         ofParameter<int> filterDeltaDistance;
         ofParameter<float> filterDeltaVelocity;
+        ofParameter<float> filterRatio;
         ofParameter<float> filterMinX, filterMaxX, filterMinY, filterMaxY;
-        
+
+
         ofParameter<bool> sendContours;
         ofParameter<float> simplifyContours;
         ofParameter<int> sendImage;

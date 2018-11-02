@@ -28,14 +28,16 @@ np::helper::OSCTracking::OSCTracking(){
 
         parameters.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
         parameters.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
+        parameters.add( filterRatio.set("filter ratio", 10.0f, 1.0f, 25.0f) );
         parameters.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
         parameters.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
         parameters.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
         parameters.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
 
+
         parameters.add( sendContours.set( "send contours", false ) );
         parameters.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
-        
+
         parameters.add( sendImage.set("send image", 0, 0, 2) );
 
     network.setName("network");
@@ -169,8 +171,11 @@ void np::helper::OSCTracking::doBlobs(){
 
 
     for( size_t i=0; i<finder.size(); ++i ){
-
-        if( finder.getCenter(i).x > x0 && finder.getCenter(i).x < x1 && finder.getCenter(i).y > y0 && finder.getCenter(i).y < y1 ){
+        
+        float rw = finder.getBoundingRect(i).width;
+        float rh = finder.getBoundingRect(i).height;
+        
+        if( finder.getCenter(i).x > x0 && finder.getCenter(i).x < x1 && finder.getCenter(i).y > y0 && finder.getCenter(i).y < y1 && ( ( rw / rh )<filterRatio ) && ( ( rh / rw )<filterRatio ) ){
 
             bool insert = true;
 
@@ -183,7 +188,7 @@ void np::helper::OSCTracking::doBlobs(){
                     if( sendContours ||
                         // check the distance or velocity changed enough
                         ( glm::distance( blob.center, glm::vec2(finder.getCenter(i).x, finder.getCenter(i).y) ) > float(filterDeltaDistance) ) ||
-                        (glm::distance( blob.velocity, glm::vec2(finder.getVelocity(i)[0], finder.getVelocity(i)[1]) ) > filterDeltaVelocity )
+                        (glm::distance( blob.velocity, glm::vec2(finder.getVelocity(i)[0], finder.getVelocity(i)[1]) ) > filterDeltaVelocity ) 
                      ){ // then
                         blob.center.x = finder.getCenter(i).x;
                         blob.center.y = finder.getCenter(i).y;
@@ -207,6 +212,7 @@ void np::helper::OSCTracking::doBlobs(){
                 blobs.back().contour = finder.getPolyline( i );
                 blobs.back().label = finder.getLabel(i);
             }
+        
         }
     }
 

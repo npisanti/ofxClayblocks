@@ -44,6 +44,7 @@ public:
 
         ofParameter<int> filterDeltaDistance;
         ofParameter<float> filterDeltaVelocity;
+        ofParameter<float> filterRatio;
         ofParameter<float> filterMinX, filterMaxX, filterMinY, filterMaxY;
 
         ofParameter<bool> sendContours;

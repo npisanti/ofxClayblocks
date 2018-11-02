@@ -29,6 +29,7 @@ ofx::clayblocks::CvTracker::CvTracker(){
 
         tracker.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
         tracker.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
+        tracker.add( filterRatio.set("filter ratio", 10.0f, 1.0f, 25.0f) );
         tracker.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
         tracker.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
         tracker.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
