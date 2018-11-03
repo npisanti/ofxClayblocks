@@ -56,36 +56,9 @@ public:
         ofParameter<int> simulatedBlobs;
         ofParameter<float> speed;
 
-    ofParameterGroup mapping;
-        ofParameter<bool> active;
-        ofParameterGroup input;
-        ofParameter<float> mapX0;
-        ofParameter<float> mapX1;
-        ofParameter<float> mapY0;
-        ofParameter<float> mapY1;
-        ofParameterGroup output;
-        ofParameter<int> outX;
-        ofParameter<int> outY;
-        ofParameter<int> outW;
-        ofParameter<int> outH;
-        ofParameter<float> testSize;
-
-    void mapToSurface( int w, int h );
-
-    void startRecordingAverage();
-    void stopRecordingAverage();
-
-    void drawMappingTest();
-
 private:
     void updateBlob( Blob & blob, ofxOscMessage & m );
     void onSimulate( bool & value );
-    void onMappingOutChange( int & value );
-
-    void doMapping( float & x, float & y );
-
-    float outX1;
-    float outY1;
 
     ofxOscReceiver oscReceiver;
     ofxOscParameterSync sync;
@@ -94,10 +67,6 @@ private:
     ofImage receivedImage;
 
     float t0;
-
-    bool bRecordAverage;
-    glm::vec2 average;
-    std::vector<glm::vec2> recorded;
 
 };
 

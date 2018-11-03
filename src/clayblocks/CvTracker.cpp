@@ -49,44 +49,8 @@ ofx::clayblocks::CvTracker::CvTracker(){
 
     simulate.addListener( this, &ofx::clayblocks::CvTracker::onSimulate );
 
-    bRecordAverage = false;
-    recorded.reserve( 128 );
-
-    active = false;
 }
 
-void ofx::clayblocks::CvTracker::onMappingOutChange( int & value ){
-    outX1 = outX + outW;
-    outY1 = outY + outH;
-}
-
-void ofx::clayblocks::CvTracker::mapToSurface( int w, int h ){
-
-    outX.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
-    outY.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
-    outW.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
-    outH.addListener( this, &ofx::clayblocks::CvTracker::onMappingOutChange );
-
-    mapping.setName( "mapping" );
-    mapping.add( active.set("active", true) );
-    input.setName( "input" );
-        input.add( mapX0.set("map x0", 0.0f, 0.0f, 1.0f) );
-        input.add( mapX1.set("map x1", 1.0f, 0.0f, 1.0f) );
-        input.add( mapY0.set("map y0", 0.0f, 0.0f, 1.0f) );
-        input.add( mapY1.set("map y1", 1.0f, 0.0f, 1.0f) );
-    mapping.add( input );
-
-    output.setName( "output" );
-        output.add( outX.set("x", 0, 0, w) );
-        output.add( outY.set("y", 0, 0, h) );
-        output.add( outW.set("w", w, 0, w) );
-        output.add( outH.set("h", h, 0, h) );
-    mapping.add( output );
-
-    mapping.add( testSize.set("test size", 8, 2, 40) );
-    parameters.add( mapping );
-
-}
 
 void ofx::clayblocks::CvTracker::onSimulate( bool & value ){
     if( ! simulate ){
@@ -185,23 +149,6 @@ void ofx::clayblocks::CvTracker::update(){
         t0 = t1;
     }
 
-    if( bRecordAverage ){
-        glm::vec2 sum( 0, 0 );
-        for( auto & blob : blobs ){
-            sum.x += blob.position.x;
-            sum.y += blob.position.y;
-        }
-        sum.x /= float( blobs.size() );
-        sum.y /= float( blobs.size() );
-        recorded.push_back( sum );
-    }
-}
-
-inline void ofx::clayblocks::CvTracker::doMapping( float & x, float & y ){
-
-    x = ofMap( x, mapX0, mapX1, outX, outX1, true );
-    y = ofMap( y, mapY0, mapY1, outY, outY1, true );
-
 }
 
 inline void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage & m ){
@@ -218,18 +165,6 @@ inline void ofx::clayblocks::CvTracker::updateBlob( Blob & blob, ofxOscMessage &
     blob.contour.clear();
     for(size_t i = 9; i < m.getNumArgs(); i+=2) {
         blob.contour.addVertex( m.getArgAsFloat(i), m.getArgAsFloat(i+1) );
-    }
-
-    if( active ){
-        doMapping( blob.position.x, blob.position.y );
-        doMapping( blob.boundaries.x, blob.boundaries.y );
-        blob.boundaries.width *=  outW;
-        blob.boundaries.height *= outH;
-
-        auto & vertices = blob.contour.getVertices();
-        for ( size_t v=0; v<vertices.size(); ++v ){
-            doMapping( vertices[v].x, vertices[v].y );
-        }
     }
 
 }
@@ -251,56 +186,38 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
             if( sendImage>0 ) ofDrawBitmapString( "waiting for image blob", x+50, y+50 );
         }
 
-
         ofPushMatrix();
         ofScale( w, h );
 
-        if( ! active ){
-            ofSetColor( 255, 0, 0 );
+        ofSetColor( 255, 0, 0 );
 
-            if( sendContours ){
-                for( auto & blob : blobs ){
-                    ofFill();
-                    ofDrawCircle( blob.position.x, blob.position.y, 0.005f );
-                    ofNoFill();
-
-                    auto & vertices = blob.contour.getVertices();
-                    ofBeginShape();
-                    for(size_t i=0; i<vertices.size(); ++i){
-                        ofVertex( vertices[i].x, vertices[i].y);
-                    }
-                    ofEndShape( true );
-                    ofDrawBitmapString( ofToString(vertices.size()), blob.position.x, blob.position.y);
-
-                    auto dest = blob.position + blob.velocity * 0.004f;
-                    ofDrawLine( blob.position.x, blob.position.y, dest.x, dest.y );
-                }
-            }else{
-                for( auto & blob : blobs ){
-                    ofFill();
-                    ofDrawCircle( blob.position.x, blob.position.y, 0.005f );
-                    ofNoFill();
-                    ofDrawRectangle( blob.boundaries.x, blob.boundaries.y,
-                                    blob.boundaries.width, blob.boundaries.height );
-                    auto dest = blob.position + blob.velocity * 0.004f;
-                    ofDrawLine( blob.position.x, blob.position.y, dest.x, dest.y );
-                }
-            }
-
-        }else{
-
-            ofSetColor( 0, 255, 255, 100 );
-
+        if( sendContours ){
             for( auto & blob : blobs ){
-                float cx = ofMap( blob.position.x, outX, outX1, mapX0, mapX1 );
-                float cy = ofMap( blob.position.y, outY, outY1, mapY0, mapY1 );
-
                 ofFill();
-                ofDrawCircle( cx, cy, 0.01f );
-            }
+                ofDrawCircle( blob.position.x, blob.position.y, 0.005f );
+                ofNoFill();
 
-            ofNoFill();
-            ofDrawRectangle( mapX0, mapY0, mapX1-mapX0, mapY1-mapY0 );
+                auto & vertices = blob.contour.getVertices();
+                ofBeginShape();
+                for(size_t i=0; i<vertices.size(); ++i){
+                    ofVertex( vertices[i].x, vertices[i].y);
+                }
+                ofEndShape( true );
+                ofDrawBitmapString( ofToString(vertices.size()), blob.position.x, blob.position.y);
+
+                auto dest = blob.position + blob.velocity * 0.004f;
+                ofDrawLine( blob.position.x, blob.position.y, dest.x, dest.y );
+            }
+        }else{
+            for( auto & blob : blobs ){
+                ofFill();
+                ofDrawCircle( blob.position.x, blob.position.y, 0.005f );
+                ofNoFill();
+                ofDrawRectangle( blob.boundaries.x, blob.boundaries.y,
+                                blob.boundaries.width, blob.boundaries.height );
+                auto dest = blob.position + blob.velocity * 0.004f;
+                ofDrawLine( blob.position.x, blob.position.y, dest.x, dest.y );
+            }
         }
 
         ofSetColor( 150, 40, 40 );
@@ -317,39 +234,4 @@ void ofx::clayblocks::CvTracker::draw( int x, int y, int w, int h ){
 
     ofPopStyle();
     ofPopMatrix();
-}
-
-void ofx::clayblocks::CvTracker::startRecordingAverage(){
-    recorded.clear();
-    bRecordAverage = true;
-}
-
-void ofx::clayblocks::CvTracker::stopRecordingAverage(){
-    average.x = 0.0f;
-    average.y = 0.0f;
-
-    for( auto & point : recorded ){
-        average.x += point.x;
-        average.y += point.y;
-    }
-
-    average.x /= float( recorded.size() );
-    average.y /= float( recorded.size() );
-
-    recorded.clear();
-    bRecordAverage = false;
-}
-
-void ofx::clayblocks::CvTracker::drawMappingTest(){
-
-    float rectoff = testSize / 4;
-
-    for( auto & blob : blobs ){
-        float cx = blob.position.x;
-        float cy = blob.position.y;
-
-        ofDrawRectangle( cx-rectoff, outY, rectoff*2, outH );
-        ofDrawRectangle( outX, cy-rectoff, outW, rectoff*2 );
-        ofDrawCircle( cx, cy, testSize );
-    }
 }
