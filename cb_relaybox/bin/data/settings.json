@@ -1,0 +1,36 @@
+{
+    "relaybox": {
+        "command_0": {
+            "address": "/relay/k1",
+            "gpio": "17"
+        },
+        "command_1": {
+            "address": "/relay/k2",
+            "gpio": "18"
+        },
+        "command_2": {
+            "address": "/relay/k3",
+            "gpio": "22"
+        },
+        "command_3": {
+            "address": "/relay/k4",
+            "gpio": "23"
+        },
+        "command_4": {
+            "address": "/relay/k5",
+            "gpio": "24"
+        },
+        "command_5": {
+            "address": "/relay/k6",
+            "gpio": "25"
+        },
+        "command_6": {
+            "address": "/relay/k7",
+            "gpio": "12"
+        },
+        "command_7": {
+            "address": "/relay/k8",
+            "gpio": "13"
+        }
+    }
+}
