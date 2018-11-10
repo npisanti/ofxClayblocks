@@ -1,3 +1,2 @@
 ofxGPIO
-ofxXmlSettings
 ofxOsc

@@ -7,9 +7,8 @@
 #include "ofMain.h"
 #include "ofAppNoWindow.h"
 #include "ofxGPIO.h"
-#include "ofxXmlSettings.h"
 #include "ofxOsc.h"
-
+#include "ofxOscParameterSync.h"
 
 // The default I2C address
 #define MPR121_I2CADDR_DEFAULT 0x5A
@@ -51,30 +50,23 @@
 #define MPR121_GPIOCLR  0x79
 #define MPR121_GPIOTOGGLE  0x7A
 
-
-
 #define MPR121_SOFTRESET 0x80
-
 
 
 class noWin : public ofBaseApp{
 public:
     
     I2c * bus;
-    ofxOscSender sender;
-    string id;
     vector<int> touches;
     vector<int> touches_m1;
     bool verbose;
-    string path;
     
     void setThresholds( uint8_t touch, uint8_t release ){
-        for (uint8_t i=0; i<12; i++) {
+        for (uint8_t i=0; i<touches.size(); i++) {
             bus->writeByte(MPR121_TOUCHTH_0 + 2*i, touch);
             bus->writeByte(MPR121_RELEASETH_0 + 2*i, release);
         }
     }
-    
     
     uint16_t touched() {
         uint8_t data [2];
@@ -83,32 +75,88 @@ public:
         return t & 0x0FFF;
     }
 
+    ofParameterGroup parameters;
+        ofParameter<std::string> clientIP;
+        ofParameter<std::string> oscAddress;
+        ofParameter<int> touchThreshold;
+        ofParameter<int> releaseThreshold;
+            void onThresholds( int & value ){ setThresholds(touchThreshold, releaseThreshold); }
 
+    ofxOscSender sender;
+
+    ofParameterGroup sync; 
+    ofxOscParameterSync synchronizer;
+
+    
     void setup(){
         ofSetVerticalSync(false);
         
-        // set up variables
-        ofxXmlSettings settings;
-        cout <<  "[xml settings] loading "<<path<< endl;
-        if( settings.loadFile( path ) ){
-            cout << "[xml settings] "<<path<<" loaded!" << endl;
-        }else{
-            cout << "[xml settings] error! unable to load "<<path<< endl;
-            exit();
-        }
+        oscAddress.set("osc address", "/capacitive");
         
-        string ip = settings.getValue("settings:client_ip", "localhost");
-        int port = settings.getValue("settings:port", 4444);   
-        int threshold = settings.getValue("settings:threshold", 12);   
-        int release = settings.getValue("settings:release", 6);   
-        id = settings.getValue("settings:id", "cap");
-        id = "/" + id;
-        verbose = settings.getValue("settings:verbose", 0);        
-        
-        
-        // SET UP OSC
-        sender.setup( ip, port );
+        // ----------------- loading settings ----------------------------------
+        parameters.setName("capacitive");
+            parameters.add( clientIP.set("client IP", "locahost") );
+            //parameters.add( oscAddress ); // enable custom address
+            parameters.add( touchThreshold.set("touch threshold", 12, 0, 255) );
+            parameters.add( releaseThreshold.set("release threshold", 6, 0, 255) );
+            touchThreshold.addListener( this, &noWin::onThresholds );
+            releaseThreshold.addListener( this, &noWin::onThresholds );        
+                
+        ofJson json = ofLoadJson("settings.json");
+        ofDeserialize( json, parameters );
 
+        //ofJson json;
+        //ofSerialize( json, parameters );
+        //ofSavePrettyJson( "settings.json", json );
+
+        // --------------- generating ports ------------------------------------ 
+        int port = 12345;
+        
+        const auto & myIPs = ofSplitString( ofSystem( "hostname -I" ), " " );
+
+        // check for similarity to the clientIP
+        int chosen = 0;
+        int greatestSim = 0;
+        for( size_t i=0; i<myIPs.size(); ++i ){
+            int min = (clientIP.get().size() < myIPs[i].size()) ? clientIP.get().size() : myIPs[i].size();
+            int similarity = 0;
+            for(int k=1; k<min; ++k){
+                if( clientIP.get().substr(0, k) == myIPs[i].substr(0, k) ){
+                    similarity++;
+                }
+            }
+            if( similarity > greatestSim ){
+                greatestSim = similarity;
+                chosen = i;
+            }
+            //std::cout<<"ip: "<<myIPs[i]<<" similarity="<<similarity<<"\n";
+        }
+        //std::cout<<"ip: "<<myIPs[chosen]<<" is chosen\n";
+        
+        // in case of localhost, the first will be chosen 
+        std::string portGenerator = myIPs[chosen]; 
+        
+        const auto & addressNumbers = ofSplitString( portGenerator, "." );
+        port = 1000 + ofToInt(addressNumbers[3]);
+        int serverSyncSend = 2000 + ofToInt(addressNumbers[3]);
+        int serverSyncReceive = 3000 + ofToInt(addressNumbers[3]);
+        
+
+        // ------------------ OSC setup ----------------------------------------
+        sender.setup( clientIP, port );
+        
+        std::cout<<"[cb_capacitive] sending OSC to "<<clientIP<<" on port "<<port<<"\n";   
+   
+        sync.setName( "Capacitive" );
+        sync.add( touchThreshold );
+        sync.add( releaseThreshold );
+
+        synchronizer.setup( sync, serverSyncReceive, clientIP, serverSyncSend );
+
+        std::cout<<"[cb_capacitive] syncing parameters on port "<<serverSyncSend<<" (send) and port "<<serverSyncReceive<<" (receive)\n";
+      
+
+        // -------------- setting up i2c ---------------------------------------
         // SET UP i2c
         bus = new I2c("/dev/i2c-1");
         bus->addressSet(MPR121_I2CADDR_DEFAULT);
@@ -121,10 +169,10 @@ public:
 
         uint8_t c =  bus->readByte(MPR121_CONFIG2);
         if (c != 0x24) {
-            ofLogError()<<"failed to initialize";
+            std::cout<<"[cb_capacitive] ERROR! failed to initialize i2c\n";
         } else {
 
-            setThresholds(threshold, release);
+            setThresholds(touchThreshold, releaseThreshold);
 
             bus->writeByte(MPR121_MHDR, 0x01);
             bus->writeByte(MPR121_NHDR, 0x01);
@@ -152,20 +200,25 @@ public:
             
             // enable all electrodes
             bus->writeByte(MPR121_ECR, 0x8F);  // start with first 5 bits of baseline tracking
+
+            touches.resize(12);
+            touches_m1.resize(12);
+            for(size_t i=0; i<touches.size(); ++i){
+                touches[i] = touches_m1[i] = 0;
+            }
         }
-        
-        touches.resize(12);
-        touches_m1.resize(12);
-        for(size_t i=0; i<touches.size(); ++i){
-            touches[i] = touches_m1[i] = 0;
-        }
+   
     }
     
     void update(){
         
-        uint16_t touchbytes = touched();
-
-        for (int i=0; i<12; i++) {
+        uint16_t touchbytes;
+         
+        if( touches.size() ){
+            touchbytes = touched();
+        }
+        
+        for (size_t i=0; i<touches.size(); i++) {
 
             uint16_t i_touched = (touchbytes >> i) & 0x0001;
 
@@ -174,7 +227,7 @@ public:
             if(touches[i] != touches_m1[i] ){
                 //ofLog()<< "cap sensor " << i << " value= "<<touches[i];
                 ofxOscMessage m;
-                m.setAddress( id );
+                m.setAddress( oscAddress.get() );
                 m.addIntArg( i );
                 m.addIntArg( touches[i] );
                 sender.sendMessage(m, false);
@@ -182,6 +235,8 @@ public:
             
             touches_m1[i] = touches[i];
         }
+        
+        synchronizer.update();
         
         ofSleepMillis(1);
     }
@@ -191,16 +246,6 @@ public:
 int main(int argc, char *argv[]){
     ofAppNoWindow window;
     noWin * app = new noWin();
-    
-    app->path = std::string("settings.xml");
-    if(argc>1){		
-		for(int i=1; i<argc; i+=2){
-			if( ! strcmp( argv[i], "-c" ) ){
-                app->path = std::string( argv[i+1] );	
-			}
-		}
-	}
-
     ofSetupOpenGL(&window, 0,0, OF_WINDOW);
     ofRunApp( app );
 }

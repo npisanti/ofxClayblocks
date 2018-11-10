@@ -1,0 +1,7 @@
+{
+    "capacitive": {
+        "client_IP": "169.254.0.1",
+        "touch_threshold": "12",
+        "release_threshold": "6"
+    }
+}
