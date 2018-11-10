@@ -1,0 +1,47 @@
+{
+    "piezos": {
+        "network": {
+            "client_ip": "169.254.0.1"
+        },
+        "sensor_0": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        },
+        "sensor_1": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        },        
+        "sensor_2": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        },
+        "sensor_3": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        },
+        "sensor_4": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        },
+        "sensor_5": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        },
+        "sensor_6": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        },
+        "sensor_7": {
+            "active": "1",
+            "threshold_low": "0",
+            "threshold_high": "1023"
+        }
+    }
+}
