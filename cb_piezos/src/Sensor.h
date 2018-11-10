@@ -3,17 +3,23 @@
 
 #include "ofMain.h"
 #include "ofxOsc.h"
-#include "piezo/Params.h"
 #include "ofxGPIO.h"
 
 namespace ofx{ namespace clayblocks{ namespace piezo{
     
-class Sensor : public Params {
+class Sensor {
 public:
     Sensor();
     
     void setup ( int channel, MCP & mcp, ofxOscSender & sender, string oscAddress="/piezos" );
     void update();
+
+    ofParameterGroup parameters;        
+        ofParameter<bool>   active;
+        ofParameter<int>    thresholdLow;
+        ofParameter<int>    thresholdHigh;
+
+    ofParameterGroup & label( std::string name );
 
 private:
     int channel;

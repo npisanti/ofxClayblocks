@@ -13,7 +13,7 @@ void ofApp::setup(){
         network.add( clientIP.set("client ip", "localhost") );
     parameters.add( network );
     
-    piezos.resize( OFXRPIEZOS_NUM_SENSORS );
+    piezos.resize( 6 );
     
     for( size_t i=0; i<piezos.size(); ++i ){
         parameters.add( piezos[i].label( "sensor "+ofToString(i) ) );
@@ -54,9 +54,9 @@ void ofApp::setup(){
     std::string portGenerator = myIPs[chosen]; 
     
     const auto & addressNumbers = ofSplitString( portGenerator, "." );
-    port = 1000 + ofToInt(addressNumbers[3]);
-    int serverSyncSend = 2000 + ofToInt(addressNumbers[3]);
-    int serverSyncReceive = 3000 + ofToInt(addressNumbers[3]);
+    port = 2000 + ofToInt(addressNumbers[3]);
+    int serverSyncSend = 3000 + ofToInt(addressNumbers[3]);
+    int serverSyncReceive = 4000 + ofToInt(addressNumbers[3]);
     
     // ------------------ OSC setup --------------------------------------------
         

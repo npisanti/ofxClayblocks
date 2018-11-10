@@ -10,11 +10,11 @@ void ofx::clayblocks::RelayBox::setup( std::string serverIP ){
     if( addressNumbers[0]=="localhost" ){
         const auto & myIPs = ofSplitString( ofSystem( "hostname -I" ), " " );
         const auto & first = ofSplitString( myIPs[0], "." );
-        port = 1000 + ofToInt( first[3] );
+        port = 2000 + ofToInt( first[3] );
         std::cout<<"[ofx::clayblocks::RelayBox] sending messages to localhost, port "<<port<<"\n";
         sender.setup( serverIP, port ); 
     }else if( addressNumbers.size()  == 4 ){
-        port = 1000 + ofToInt( addressNumbers[3] );
+        port = 2000 + ofToInt( addressNumbers[3] );
         std::cout<<"[ofx::clayblocks::RelayBox] sending messages to "<<serverIP<<", port "<<port<<"\n";
         sender.setup( serverIP, port ); 
     }else{

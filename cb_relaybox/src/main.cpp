@@ -59,7 +59,7 @@ public:
             
             const auto & addressNumbers = ofSplitString( ip, "." );
             
-            int port = 1000 + ofToInt(addressNumbers[3]);
+            int port = 2000 + ofToInt(addressNumbers[3]);
             receivers[i].setup( port );
             
             std::cout<<"[cb_relaybox] listening on port "<<port<< "\n";

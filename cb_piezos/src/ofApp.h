@@ -4,7 +4,6 @@
 
 #include "ofxOsc.h"
 #include "Sensor.h"
-#include "piezo/Constants.h"
 #include "ofxGPIO.h"
 #include "ofxOscParameterSync.h"
 

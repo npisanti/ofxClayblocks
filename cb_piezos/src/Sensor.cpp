@@ -5,6 +5,16 @@ ofx::clayblocks::piezo::Sensor::Sensor() {
     oldValue = 0;
     a2d = nullptr;
     sender = nullptr;
+    
+    parameters.setName( "piezo sensor" );
+    parameters.add( active.set("active", true ) );
+    parameters.add( thresholdLow.set("threshold low", 0, 0, 1023 ) );
+    parameters.add( thresholdHigh.set("threshold high", 1023, 0, 1023 ) );
+}
+
+ofParameterGroup & ofx::clayblocks::piezo::Sensor::label( std::string name ){
+    parameters.setName( name );
+    return parameters;
 }
 
 void ofx::clayblocks::piezo::Sensor::setup( int channel, MCP & mcp, ofxOscSender & sender, string oscAddress ){

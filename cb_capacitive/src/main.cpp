@@ -137,9 +137,9 @@ public:
         std::string portGenerator = myIPs[chosen]; 
         
         const auto & addressNumbers = ofSplitString( portGenerator, "." );
-        port = 1000 + ofToInt(addressNumbers[3]);
-        int serverSyncSend = 2000 + ofToInt(addressNumbers[3]);
-        int serverSyncReceive = 3000 + ofToInt(addressNumbers[3]);
+        port = 2000 + ofToInt(addressNumbers[3]);
+        int serverSyncSend = 3000 + ofToInt(addressNumbers[3]);
+        int serverSyncReceive = 4000 + ofToInt(addressNumbers[3]);
         
 
         // ------------------ OSC setup ----------------------------------------
