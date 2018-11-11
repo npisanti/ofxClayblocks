@@ -1,2 +1,3 @@
 ofxOsc
 ofxClayblocks
+ofxGui

@@ -2,37 +2,47 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetWindowTitle("rpiezos receiver class");
+    ofSetWindowTitle("piezos client");
     
 	ofSetFrameRate(60); // run at 60 fps
 	ofSetVerticalSync(true);
+    ofDisableAntiAliasing();
 
-    piezos.start( 12345 );
-
+    piezos.setup( "169.254.0.2" );
+    gui.setup("panel", "settings.xml", 20, 20 );
+    
+    // adds piezo sensors parameter groups
+    for( auto & piezo : piezos.piezos ){
+        gui.add( piezo.parameters );
+    }
+    
+    // piezos.parameters is all the groups already grouped together
+    // you can do this instead of adding it for each sensor
+    //gui.add( piezos.parameters ); 
+    
+    // loading the settings from file will update all the values on the server
+    gui.loadFromFile( "settings.xml" );
+    gui.minimizeAll();
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    // this will also clear the triggers
-    piezos.logTriggers();
-    
+    piezos.update();
 }
-
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
     ofBackground( 0 );
-
-    piezos.drawEnvelopes( 0, 0, ofGetWidth() );
-
+    
+    gui.draw();
+    
+    piezos.draw( 240, 20, ofGetWidth()-260, ofGetHeight()-40, ofColor( 255, 80, 80) );
+    //piezos.drawEnvelopes( 0, 0, ofGetWidth() );
 }
-
 
 //--------------------------------------------------------------
 void ofApp::exit(){
-    
-    piezos.stop();
     
 }
 

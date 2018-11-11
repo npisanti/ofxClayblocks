@@ -1,5 +1,0 @@
-ofxOsc
-ofxGui
-ofxXmlSettings
-ofxRPiezos
-
