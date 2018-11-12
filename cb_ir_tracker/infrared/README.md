@@ -5,6 +5,7 @@ The IR light produced by the included LEDs is not that strong and could illumina
 <p align="center">
   <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_ir_tracker/infrared/light.jpg" width="700">
 </p>
+(this one works very well up to about 8m)
 
 You should aim for a big contrast between the background and the object you want to track, so the objects should be IR reflective and the background not that much. 
 

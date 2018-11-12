@@ -36,6 +36,7 @@ The tracker has some parameters to change its settings:
 - `filter max X` : don't send an OSC message based on center position, filters high x boundary
 - `filter min Y` : don't send an OSC message based on center position, filters low y boundary
 - `filter max Y` : don't send an OSC message based on center position, filters high y boundary
+- 'filter ratio' : don't send an OSC message one of the dimensions is too much bigger than the other
 - `send contours` : send full contour information
 - `simplify contours` : amount of contour simplification before sending OSC
 - `send image` : when it's different than 0 a low res version of the camera image is sent over OSC, enable it just for setting up and then deactivate it to save network bandwidth, 0 is off, 1 is the camera image, 2 the thresholded image

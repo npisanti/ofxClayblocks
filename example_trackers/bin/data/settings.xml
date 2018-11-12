@@ -24,7 +24,7 @@
 			<filter_max_Y>1</filter_max_Y>
 			<send_contours>0</send_contours>
 			<simplify_contours>0.6</simplify_contours>
-			<send_image>2</send_image>
+			<send_image>1</send_image>
 		</tracker>
 		<simulation>
 			<simulate>0</simulate>

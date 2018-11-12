@@ -4,7 +4,6 @@
 
 #include "ofxOsc.h"
 #include "ofxOscParameterSync.h"
-#include "ofxGui.h"
 #include "ofxKinect.h"
 #include "ofxCv.h"
 #include "ofxOpenCv.h"

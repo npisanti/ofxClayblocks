@@ -20,7 +20,7 @@ void ofApp::setup() {
             camera.add( tilt.set("tilt", 0, -30, 30) );
                 tilt.addListener( this, &ofApp::onTilt );
             camera.add( useDepth.set("use depth", true) );
-                useDepth.addListener( this, &ofApp::onUseDepth );
+
         settings.add( camera );
     
         settings.add( tracking.tracker );
@@ -58,6 +58,7 @@ void ofApp::setup() {
     // now setup the tracking 
     tracking.setup( width, height, frame );
     
+    useDepth.addListener( this, &ofApp::onUseDepth );
 }
     
 void ofApp::onTilt( int & value ){
@@ -66,11 +67,14 @@ void ofApp::onTilt( int & value ){
 
 void ofApp::onUseDepth( bool & value ){
     if( currentMode != useDepth ){
+        
         kinect.close();
         ofSleepMillis( 200 );
         if( useDepth ){
+            std::cout<<"[cb_kinect_tracker] reinitializing kinect, using depth\n";
             kinect.init(false, false); // disable video image (faster fps)
         }else{
+            std::cout<<"[cb_kinect_tracker] reinitializing kinect, enabling infrared\n";
             kinect.init( true ); // setup kinect with infrared       
         }
         kinect.open();	
