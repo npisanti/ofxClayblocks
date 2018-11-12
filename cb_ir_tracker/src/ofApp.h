@@ -41,5 +41,11 @@ public:
     
     np::helper::OSCTracking tracking;
     
+    void onSaturation( int & value );
+    void onSharpness( int & value );
+    void onContrast( int & value );
+    void onBrightness( int & value );
+    void onAWB( int & value );
+    void onExposure( int & value );
     
 };

@@ -7,7 +7,7 @@ void ofApp::setup(){
 	ofSetFrameRate(60); // run at 60 fps
 	ofSetVerticalSync(true);
 
-    phone.start( 4444 );
+    phone.start( 7001 );
     
     gui.setup( "settings", "settings.xml", ofGetWidth()-220, 20 );
     gui.add( phone.parameters );

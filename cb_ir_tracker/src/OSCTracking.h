@@ -16,13 +16,14 @@ public:
 
     void setup( int width, int height, const cv::Mat & toImitate );
     void update( cv::Mat & frame );
-    void sync();
+    void updateSync();
 
-    ofParameterGroup parameters;
+    ofParameterGroup tracker;
         ofParameter<bool> doBackgroundSubtraction;
+        ofParameter<bool> takeBackground;
         ofParameter<bool> denoise;
-        ofParameter<int> low;
-        ofParameter<int> high;
+        ofParameter<int> thresholdLow;
+        ofParameter<int> thresholdHigh;
         ofParameter<int> minArea;
         ofParameter<int> maxArea;
         ofParameter<int> persistence;
@@ -33,18 +34,16 @@ public:
         ofParameter<float> filterRatio;
         ofParameter<float> filterMinX, filterMaxX, filterMinY, filterMaxY;
 
-
         ofParameter<bool> sendContours;
         ofParameter<float> simplifyContours;
         ofParameter<int> sendImage;
 
 
     ofParameterGroup network;
-        ofParameter<std::string> ip;
-        ofParameterGroup ports;
-        ofParameter<int> oscPort;
-        ofParameter<int> syncSendPort;
-        ofParameter<int> syncReceivePort;
+        ofParameter<std::string> clientIP;
+        
+
+    ofParameterGroup sync;
 
     cv::Mat tLow;
     cv::Mat tHigh;
@@ -80,8 +79,6 @@ private:
 
     int width, height;
 
-    bool bTakeBackground;
-
     std::vector<SensedBlob> blobs;
     float divideW, divideH;
 
@@ -93,8 +90,6 @@ private:
     cv::Mat background;
 
     void doBlobs();
-
-    void onBGSubtractionToggle( bool & value );
 
 };
 

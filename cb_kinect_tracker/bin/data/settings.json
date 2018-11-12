@@ -5,18 +5,23 @@
             "tilt": "10",
             "use_depth": "1"
         },
-        "tracking": {
+        "tracker": {
             "area_max": "15000",
             "area_min": "100",
             "background_subtraction": "0",
-            "send_image": "1",
             "max_distance": "32",
             "persistence": "15",
             "threshold_high": "250",
             "threshold_low": "100",
-            "update_sensitivity": "10",
-            "deadzone_width":"0",
-            "deadzone_height" : "0"
+            "filter_delta_distance": "10",
+            "filter_delta_velocity": "10",
+            "filter_min_x":"0.0",
+            "filter_max_x":"1.0",
+            "filter_min_y":"0.0",
+            "filter_max_y":"1.0",
+            "send_contours": "0",
+            "send_image": "0",
+            "simplify_contours": "0.6"
         },
         "network": {
             "client_ip": "localhost"

@@ -12,7 +12,6 @@ void ofApp::setup() {
     width = 640; 
     height = 480;
 
-    
     // loading settings 
     settings.setName( "settings");
         settings.add( drawToScreen.set("draw to screen", false) );
@@ -21,6 +20,7 @@ void ofApp::setup() {
             camera.add( tilt.set("tilt", 0, -30, 30) );
                 tilt.addListener( this, &ofApp::onTilt );
             camera.add( useDepth.set("use depth", true) );
+                useDepth.addListener( this, &ofApp::onUseDepth );
         settings.add( camera );
     
         settings.add( tracking.tracker );
@@ -43,6 +43,7 @@ void ofApp::setup() {
     }else{
         kinect.init( true ); // setup kinect with infrared       
     }
+    currentMode = useDepth;
     
     kinect.open();	
     kinect.setCameraTiltAngle( tilt );
@@ -61,6 +62,20 @@ void ofApp::setup() {
     
 void ofApp::onTilt( int & value ){
     kinect.setCameraTiltAngle( tilt );
+}
+
+void ofApp::onUseDepth( bool & value ){
+    if( currentMode != useDepth ){
+        kinect.close();
+        ofSleepMillis( 200 );
+        if( useDepth ){
+            kinect.init(false, false); // disable video image (faster fps)
+        }else{
+            kinect.init( true ); // setup kinect with infrared       
+        }
+        kinect.open();	
+        currentMode = useDepth;
+    }
 }
 
 // ------------------------------------------------------------------

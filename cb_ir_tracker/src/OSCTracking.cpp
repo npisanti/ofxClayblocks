@@ -8,46 +8,60 @@ np::helper::OSCTracking::OSCTracking(){
     blobs.reserve(128); // more than enough
     blobs.clear();
 
-
-    bTakeBackground = true;
     finder.setThreshold(127);
 
     buffersize = BUFFERW*BUFFERH;
     buffer = new char[buffersize];
 
-    parameters.setName( "cvtracker");
-        parameters.add( doBackgroundSubtraction.set("background subtraction", false) );
-            //doBackgroundSubtraction.addListener( this, &ofApp::onBGSubtractionToggle );
-        parameters.add( denoise.set("denoise", false) );
-        parameters.add( low.set("threshold low", 0, 0, 255) );
-        parameters.add( high.set("threshold high", 255, 0, 255) );
-        parameters.add( minArea.set("area min", 20, 1, 25000) );
-        parameters.add( maxArea.set("area max", 20000, 1, 100000) );;
-        parameters.add( persistence.set("persistence", 15, 1, 100) );
-        parameters.add( maxDistance.set("max distance", 32, 1, 100) );
-
-        parameters.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
-        parameters.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
-        parameters.add( filterRatio.set("filter ratio", 10.0f, 1.0f, 25.0f) );
-        parameters.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
-        parameters.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
-        parameters.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
-        parameters.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
-
-
-        parameters.add( sendContours.set( "send contours", false ) );
-        parameters.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
-
-        parameters.add( sendImage.set("send image", 0, 0, 2) );
-
+    sync.setName( "sync");
+        sync.add( doBackgroundSubtraction.set("background subtraction", false) );
+        sync.add( takeBackground.set("take background", true) );
+        sync.add( denoise.set("denoise", false) );
+        sync.add( thresholdLow.set("threshold low", 0, 0, 255) );
+        sync.add( thresholdHigh.set("threshold high", 255, 0, 255) );
+        sync.add( minArea.set("area min", 20, 1, 5000) );
+        sync.add( maxArea.set("area max", 15000, 1, 50000) );;
+        sync.add( persistence.set("persistence", 15, 1, 100) );
+        sync.add( maxDistance.set("max distance", 32, 1, 100) );
+        sync.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
+        sync.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
+        sync.add( filterRatio.set("filter ratio", 10.0f, 1.0f, 25.0f) );
+        sync.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
+        sync.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
+        sync.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
+        sync.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
+        sync.add( sendContours.set( "send contours", false ) );
+        sync.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
+        sync.add( sendImage.set("send image", 0, 0, 2) );
+    
+    tracker.setName("tracker" );
+        tracker.add( doBackgroundSubtraction );
+        tracker.add( takeBackground );
+        tracker.add( denoise );
+        tracker.add( thresholdLow );
+        tracker.add( thresholdHigh );
+        tracker.add( minArea );
+        tracker.add( maxArea );
+        tracker.add( persistence );
+        tracker.add( maxDistance);
+        tracker.add( filterDeltaDistance );
+        tracker.add( filterDeltaVelocity );
+        tracker.add( filterRatio );
+        tracker.add( filterMinX );
+        tracker.add( filterMaxX );
+        tracker.add( filterMinY );
+        tracker.add( filterMaxY );
+        tracker.add( sendContours );
+        tracker.add( simplifyContours );
+        tracker.add( sendImage );    
+        
     network.setName("network");
-        network.add( ip.set("client ip", "localhost") );
+        network.add( clientIP.set("client ip", "localhost") );
+        
+    // setup group for OSC parameter sync 
 
-        ports.setName("ports");
-            ports.add( oscPort.set( "osc send", 12345, 0, 15000) );
-            ports.add( syncSendPort.set("sync send", 4243, 0, 15000) );
-            ports.add( syncReceivePort.set("sync receive", 4244, 0, 15000) );
-        network.add( ports );
+    //sync.add( doBackgroundSubtraction );
+    //sync.add( sendImage );
 }
 
 np::helper::OSCTracking::~OSCTracking(){
@@ -58,11 +72,42 @@ void np::helper::OSCTracking::setup( int width, int height, const cv::Mat & toIm
     this->width = width;
     this->height = height;
 
-    sender.setup( ip, oscPort );
-    synchronizer.setup( parameters, syncReceivePort, ip, syncSendPort );
+    // --------------- generating ports ------------------------------------ 
+    int port = 12345;
+    
+    const auto & myIPs = ofSplitString( ofSystem( "hostname -I" ), " " );
 
-    std::cout<<"[cvtracker] sending tracking OSC to "<<ip<<" on port "<<oscPort<<"\n";
-    std::cout<<"[cvtracker] syncing parameters to "<<ip<<" with ports "<<syncSendPort<<" (send) and "<<syncReceivePort<<" (receive) \n";
+    // check for similarity to the clientIP
+    int chosen = 0;
+    int greatestSim = 0;
+    for( size_t i=0; i<myIPs.size(); ++i ){
+        int min = (clientIP.get().size() < myIPs[i].size()) ? clientIP.get().size() : myIPs[i].size();
+        int similarity = 0;
+        for(int k=1; k<min; ++k){
+            if( clientIP.get().substr(0, k) == myIPs[i].substr(0, k) ){
+                similarity++;
+            }
+        }
+        if( similarity > greatestSim ){
+            greatestSim = similarity;
+            chosen = i;
+        }
+    }
+        // in case of localhost, the first will be chosen 
+    std::string portGenerator = myIPs[chosen]; 
+    
+    const auto & addressNumbers = ofSplitString( portGenerator, "." );
+    port = 2000 + ofToInt(addressNumbers[3]);
+    int serverSyncSend = 3000 + ofToInt(addressNumbers[3]);
+    int serverSyncReceive = 4000 + ofToInt(addressNumbers[3]);
+    
+    // ------------------ OSC setup --------------------------------------------
+        
+    sender.setup( clientIP, port );
+    std::cout<<"[cb_kinectracker] sending OSC to "<<clientIP<<" on port "<<port<<"\n"; 
+       
+    synchronizer.setup( sync, serverSyncReceive, clientIP, serverSyncSend );
+    std::cout<<"[cb_kinectracker] syncing parameters on port "<<serverSyncSend<<" (send) and port "<<serverSyncReceive<<" (receive)\n";
 
     divideW = 1.0f / float(width);
     divideH = 1.0f / float(height);
@@ -71,18 +116,20 @@ void np::helper::OSCTracking::setup( int width, int height, const cv::Mat & toIm
     ofxCv::imitate( tHigh, toImitate );
     ofxCv::imitate( thresh, toImitate );
     ofxCv::imitate( background, toImitate );
+    
+    takeBackground = true;
 
 }
 
-void np::helper::OSCTracking::sync(){
+void np::helper::OSCTracking::updateSync(){
     synchronizer.update();
 }
 
 void np::helper::OSCTracking::update( cv::Mat & frame ){
 
-    if( bTakeBackground ){
+    if( takeBackground ){
         background = frame;
-        bTakeBackground = false;
+        takeBackground = false;
     }
 
     if( doBackgroundSubtraction ){
@@ -95,8 +142,8 @@ void np::helper::OSCTracking::update( cv::Mat & frame ){
         cv::medianBlur( frame, frame, 3 );
     }
 
-    cv::threshold( frame, tLow,   low, 255,  0 );
-    cv::threshold( frame, tHigh,  high, 255, 1 );
+    cv::threshold( frame, tLow,   thresholdLow, 255,  0 );
+    cv::threshold( frame, tHigh,  thresholdHigh, 255, 1 );
     cv::bitwise_and(tLow, tHigh, thresh );
 
     // set contour tracker parameters
@@ -271,11 +318,5 @@ void np::helper::OSCTracking::doBlobs(){
 
             blob.update = false;
         }
-    }
-}
-
-void np::helper::OSCTracking::onBGSubtractionToggle( bool & value ){
-    if( value ){
-        bTakeBackground = true;
     }
 }

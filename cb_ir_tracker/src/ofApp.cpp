@@ -57,11 +57,11 @@ void ofApp::setup() {
             camera.add( sharpness.set("sharpness",0,-100,100) );
             camera.add( contrast.set("contrast",0,-100,100) );
             camera.add( brightness.set("brightness",50,0,100) );
-            camera.add( awbMode.set("auto white balance mode", 1,0,10) );
+            camera.add( awbMode.set("white balance mode", 1,0,10) );
             camera.add( exposureMode.set("exposure mode",0,0,13) );
         settings.add( camera );
 
-        settings.add( tracking.parameters );
+        settings.add( tracking.tracker );
         
         settings.add( tracking.network );
         
@@ -72,6 +72,9 @@ void ofApp::setup() {
     //ofSerialize( json, settings );
     //ofSavePrettyJson( "settings.json", json );
 
+    if( drawToScreen ){
+        ofSetWindowShape( width, height/2 );
+    }
     // cam setup
     if( useRedChannel ){         
         cam.setup( width, height, true ); // use color, get red channel to use included blue gels   
@@ -88,10 +91,25 @@ void ofApp::setup() {
     cam.setContrast( contrast );
     cam.setSaturation( saturation );
 
+    saturation.addListener( this, &ofApp::onSaturation );
+    sharpness.addListener( this, &ofApp::onSharpness );
+    contrast.addListener( this, &ofApp::onContrast );
+    brightness.addListener( this, &ofApp::onBrightness );
+    awbMode.addListener( this, &ofApp::onAWB );
+    exposureMode.addListener( this, &ofApp::onExposure );
+    
+    // add parameters for sync
+    tracking.sync.add( saturation );
+    tracking.sync.add( sharpness );
+    tracking.sync.add( contrast );
+    tracking.sync.add( brightness );
+    tracking.sync.add( awbMode );
+    tracking.sync.add( exposureMode );
+    
+    // setup cam defisheyeing 
 	calibration.setFillFrame( true ); // true by default
     calibration.load( file );
     
-
     bool hasFrame = false;
     
     while(!hasFrame){
@@ -121,7 +139,7 @@ void ofApp::setup() {
 // ------------------------------------------------------------------
 void ofApp::update() {
     
-    tracking.sync();
+    tracking.updateSync();
     
     frame = cam.grab();
     
@@ -140,8 +158,6 @@ void ofApp::update() {
     
 }
 
-
-
 // ------------------------------------------------------------------
 void ofApp::draw() {
     if( drawToScreen ){
@@ -156,4 +172,31 @@ void ofApp::draw() {
         ofSetColor( 255, 0, 0 );
         tracking.finder.draw();        
     }
+}
+
+// ------------------------------------------------------------------
+void ofApp::onSaturation( int & value ){
+    cam.setSaturation( saturation );
+}
+
+void ofApp::onSharpness( int & value ){
+    cam.setSharpness( sharpness );
+}
+
+void ofApp::onContrast( int & value ){
+    cam.setContrast( contrast );
+}
+
+void ofApp::onBrightness( int & value ){
+    cam.setBrightness( brightness );
+}
+
+void ofApp::onAWB( int & value ){
+    int mode = awbMode;
+    cam.setAWBMode( (MMAL_PARAM_AWBMODE_T) mode ); // auto white balance off
+}
+
+void ofApp::onExposure( int & value ){
+    int mode = exposureMode;
+    cam.setExposureMode((MMAL_PARAM_EXPOSUREMODE_T) mode );
 }

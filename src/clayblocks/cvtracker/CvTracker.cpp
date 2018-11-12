@@ -19,6 +19,11 @@ void ofx::clayblocks::CvTracker::onSimulate( bool & value ){
     }
 }
 
+ofParameterGroup & ofx::clayblocks::CvTracker::label( std::string name ){
+    parameters.setName( name );
+    return parameters;
+}
+
 void ofx::clayblocks::CvTracker::setup( std::string serverIP ){
     classname = "ofx::clayblocks::CvTracker";
 

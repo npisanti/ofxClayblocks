@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "clayblocks/IRTracker.h"
 #include "clayblocks/KinectTracker.h"
 #include "ofxGui.h"
 
@@ -23,7 +24,10 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-        ofx::clayblocks::KinectTracker tracker;
+        // the example code is the same for IR and kinect
+
+        //ofx::clayblocks::KinectTracker tracker;
+        ofx::clayblocks::IRTracker tracker;
 
         ofxPanel gui;
 

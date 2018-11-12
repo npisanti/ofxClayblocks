@@ -2,19 +2,22 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetWindowTitle("cvtracker client");
+    ofSetWindowTitle("CV Trackers");
 
 	ofSetFrameRate(60); // run at 60 fps
 	ofSetVerticalSync(true);
-
-    tracker.setup( 12345, "192.168.0.42" );
+    
+    tracker.setup( "localhost" );
+    //tracker.setup( "192.168.0.42" ); // set server address
 
     gui.setup("gui", "settings.xml", ofGetWidth()-220, 20 );
     gui.add( tracker.parameters );
-
+    
+    // this will update settings on the server
+    gui.loadFromFile("settings.xml"); 
+    
     // changes made here will be reflected on the server device
-    tracker.sendImage = 1;
-
+    //tracker.sendImage = 1;
 }
 
 //--------------------------------------------------------------

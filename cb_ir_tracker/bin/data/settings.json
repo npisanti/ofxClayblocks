@@ -10,10 +10,10 @@
             "sharpness": "0",
             "contrast": "50",
             "brightness": "60",
-            "auto_white_balance_mode": "7",
+            "white_balance_mode": "7",
             "exposure_mode": "2"
         },
-        "cvtracker": {
+        "tracker": {
             "area_max": "15000",
             "area_min": "100",
             "background_subtraction": "0",

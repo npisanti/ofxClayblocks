@@ -27,6 +27,8 @@ public:
 
     void draw( int x=0, int y=0, int w = 640, int h=480 );
 
+    ofParameterGroup & label( std::string name );
+
     std::vector<Blob> blobs;
 
     ofParameterGroup parameters;

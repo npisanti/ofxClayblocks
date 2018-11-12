@@ -43,5 +43,7 @@ public:
     np::helper::OSCTracking tracking;
     
     void onTilt( int & value );
-
+    void onUseDepth( bool & value );
+    
+    bool currentMode;
 };
