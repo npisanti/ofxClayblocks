@@ -40,7 +40,7 @@ public:
 
         ofParameter<bool> drawToScreen;
         
-    np::helper::OSCTracking tracking;
+    ofx::helper::OSCTracking tracking;
     
     void onTilt( int & value );
     void onUseDepth( bool & value );

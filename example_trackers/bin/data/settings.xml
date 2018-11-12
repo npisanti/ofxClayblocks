@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<gui>
+	<KinectTracker>
+		<kinect_>
+			<tilt>10</tilt>
+			<use_depth>1</use_depth>
+		</kinect_>
+		<tracker>
+			<background_subtraction>0</background_subtraction>
+			<take_background>0</take_background>
+			<denoise>0</denoise>
+			<threshold_low>40</threshold_low>
+			<threshold_high>255</threshold_high>
+			<area_min>0.15</area_min>
+			<area_max>0.9</area_max>
+			<persistence>15</persistence>
+			<max_distance>32</max_distance>
+			<filter_delta_distance>5</filter_delta_distance>
+			<filter_delta_velocity>0.01</filter_delta_velocity>
+			<filter_ratio>10</filter_ratio>
+			<filter_min_X>0</filter_min_X>
+			<filter_max_X>1</filter_max_X>
+			<filter_min_Y>0</filter_min_Y>
+			<filter_max_Y>1</filter_max_Y>
+			<send_contours>0</send_contours>
+			<simplify_contours>0.6</simplify_contours>
+			<send_image>2</send_image>
+		</tracker>
+		<simulation>
+			<simulate>0</simulate>
+			<simulated_blobs>1</simulated_blobs>
+			<speed>0.035</speed>
+		</simulation>
+	</KinectTracker>
+</gui>

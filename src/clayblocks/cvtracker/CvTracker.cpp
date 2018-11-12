@@ -32,13 +32,13 @@ void ofx::clayblocks::CvTracker::setup( std::string serverIP ){
     cameraOptions();
     
     sync.setName( "sync");
-        sync.add( doBackgroundSubtraction.set("background subtraction", false) );
+        sync.add( backgroundSubtraction.set("background subtraction", false) );
         sync.add( takeBackground.set("take background", false) );
         sync.add( denoise.set("denoise", false) );
         sync.add( thresholdLow.set("threshold low", 0, 0, 255) );
         sync.add( thresholdHigh.set("threshold high", 255, 0, 255) );
-        sync.add( minArea.set("area min", 20, 1, 5000) );
-        sync.add( maxArea.set("area max", 15000, 1, 100000) );;
+        sync.add( areaMin.set("area min", 0.0f, 0.0f, 1.0f) );
+        sync.add( areaMax.set("area max", 1.0f, 0.0f, 1.0f) );
         sync.add( persistence.set("persistence", 15, 1, 100) );
         sync.add( maxDistance.set("max distance", 32, 1, 100) );
 
@@ -55,13 +55,13 @@ void ofx::clayblocks::CvTracker::setup( std::string serverIP ){
         sync.add( sendImage.set("send image", 0, 0, 2) );
     
     tracker.setName("tracker" );
-        tracker.add( doBackgroundSubtraction );
+        tracker.add( backgroundSubtraction );
         tracker.add( takeBackground );
         tracker.add( denoise );
         tracker.add( thresholdLow );
         tracker.add( thresholdHigh );
-        tracker.add( minArea );
-        tracker.add( maxArea );
+        tracker.add( areaMin );
+        tracker.add( areaMax );
         tracker.add( persistence );
         tracker.add( maxDistance);
         tracker.add( filterDeltaDistance );
@@ -86,12 +86,6 @@ void ofx::clayblocks::CvTracker::setup( std::string serverIP ){
     parameters.add( simulation );
 
     simulate.addListener( this, &ofx::clayblocks::CvTracker::onSimulate );
-
-    // setup group for OSC parameter sync 
-    //sync.setName("trackersync");
-    //sync.add( doBackgroundSubtraction );
-    //sync.add( sendImage );
-    //sync.add( tracker );
 
     blobs.reserve( 128 );
     receivedImage.allocate( BUFFERW, BUFFERH, OF_IMAGE_COLOR );

@@ -1,4 +1,4 @@
-`cb_rpiezos`
+`cb_piezos`
 ==============
 
 This is a system composed by a shield to mount on the rPi, a server application running on the rPi to elaborate signals and a client side calibration utility.

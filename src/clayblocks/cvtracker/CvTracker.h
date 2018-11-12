@@ -34,13 +34,13 @@ public:
     ofParameterGroup parameters;
 
     ofParameterGroup tracker;
-        ofParameter<bool> doBackgroundSubtraction;
+        ofParameter<bool> backgroundSubtraction;
         ofParameter<bool> takeBackground;
         ofParameter<bool> denoise;
         ofParameter<int> thresholdLow;
         ofParameter<int> thresholdHigh;
-        ofParameter<int> minArea;
-        ofParameter<int> maxArea;
+        ofParameter<float> areaMin;
+        ofParameter<float> areaMax;
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
 

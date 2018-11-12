@@ -10,7 +10,6 @@ public:
 	void setup();
 	void update();
 	void draw();
-
     
     ofxCvPiCam cam;
     
@@ -19,11 +18,9 @@ public:
     
     cv::Mat frame;
     cv::Mat undistorted;
-
     
     ofxCv::Calibration calibration;
 
-    
     ofParameterGroup settings;
         ofParameterGroup camera;
             ofParameter<int> width;
@@ -39,7 +36,7 @@ public:
 
         ofParameter<bool> drawToScreen;
     
-    np::helper::OSCTracking tracking;
+    ofx::helper::OSCTracking tracking;
     
     void onSaturation( int & value );
     void onSharpness( int & value );

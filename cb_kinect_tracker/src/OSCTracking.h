@@ -6,7 +6,7 @@
 #include "ofxOsc.h"
 #include "ofxOscParameterSync.h"
 
-namespace np { namespace helper {
+namespace ofx { namespace helper {
 
 class OSCTracking {
 
@@ -19,13 +19,13 @@ public:
     void updateSync();
 
     ofParameterGroup tracker;
-        ofParameter<bool> doBackgroundSubtraction;
+        ofParameter<bool> backgroundSubtraction;
         ofParameter<bool> takeBackground;
         ofParameter<bool> denoise;
         ofParameter<int> thresholdLow;
         ofParameter<int> thresholdHigh;
-        ofParameter<int> minArea;
-        ofParameter<int> maxArea;
+        ofParameter<float> areaMin;
+        ofParameter<float> areaMax;
         ofParameter<int> persistence;
         ofParameter<int> maxDistance;
 
@@ -90,6 +90,10 @@ private:
     cv::Mat background;
 
     void doBlobs();
+    
+    int areaMinValue;
+    int areaMaxValue;
+    void onArea( float & value );
 
 };
 

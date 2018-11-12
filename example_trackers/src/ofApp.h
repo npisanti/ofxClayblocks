@@ -26,8 +26,8 @@ class ofApp : public ofBaseApp{
 
         // the example code is the same for IR and kinect
 
-        //ofx::clayblocks::KinectTracker tracker;
-        ofx::clayblocks::IRTracker tracker;
+        ofx::clayblocks::KinectTracker tracker;
+        //ofx::clayblocks::IRTracker tracker;
 
         ofxPanel gui;
 

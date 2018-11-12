@@ -14,8 +14,8 @@
             "exposure_mode": "2"
         },
         "tracker": {
-            "area_max": "15000",
-            "area_min": "100",
+            "area_max": "1.0",
+            "area_min": "0.0",
             "background_subtraction": "0",
             "max_distance": "32",
             "persistence": "15",

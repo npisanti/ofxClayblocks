@@ -4,23 +4,24 @@
 #define BUFFERW 160
 #define BUFFERH 120
 
-np::helper::OSCTracking::OSCTracking(){
+ofx::helper::OSCTracking::OSCTracking(){
     blobs.reserve(128); // more than enough
     blobs.clear();
 
     finder.setThreshold(127);
+    finder.setFindHoles( false );
 
     buffersize = BUFFERW*BUFFERH;
     buffer = new char[buffersize];
 
     sync.setName( "sync");
-        sync.add( doBackgroundSubtraction.set("background subtraction", false) );
+        sync.add( backgroundSubtraction.set("background subtraction", false) );
         sync.add( takeBackground.set("take background", true) );
         sync.add( denoise.set("denoise", false) );
         sync.add( thresholdLow.set("threshold low", 0, 0, 255) );
         sync.add( thresholdHigh.set("threshold high", 255, 0, 255) );
-        sync.add( minArea.set("area min", 20, 1, 5000) );
-        sync.add( maxArea.set("area max", 15000, 1, 50000) );;
+        sync.add( areaMin.set("area min", 0.0f, 0.0f, 1.0f) );
+        sync.add( areaMax.set("area max", 1.0f, 0.0f, 1.0f) );
         sync.add( persistence.set("persistence", 15, 1, 100) );
         sync.add( maxDistance.set("max distance", 32, 1, 100) );
         sync.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
@@ -35,13 +36,13 @@ np::helper::OSCTracking::OSCTracking(){
         sync.add( sendImage.set("send image", 0, 0, 2) );
     
     tracker.setName("tracker" );
-        tracker.add( doBackgroundSubtraction );
+        tracker.add( backgroundSubtraction );
         tracker.add( takeBackground );
         tracker.add( denoise );
         tracker.add( thresholdLow );
         tracker.add( thresholdHigh );
-        tracker.add( minArea );
-        tracker.add( maxArea );
+        tracker.add( areaMin );
+        tracker.add( areaMax );
         tracker.add( persistence );
         tracker.add( maxDistance);
         tracker.add( filterDeltaDistance );
@@ -59,19 +60,31 @@ np::helper::OSCTracking::OSCTracking(){
         network.add( clientIP.set("client ip", "localhost") );
         
     // setup group for OSC parameter sync 
+    areaMinValue = 0;
+    areaMaxValue = 640*480;
+    areaMin.addListener( this, &ofx::helper::OSCTracking::onArea );
+    areaMax.addListener( this, &ofx::helper::OSCTracking::onArea );
 
-    //sync.add( doBackgroundSubtraction );
-    //sync.add( sendImage );
 }
 
-np::helper::OSCTracking::~OSCTracking(){
+void ofx::helper::OSCTracking::onArea( float & value ){
+    areaMinValue = areaMin * areaMin * areaMin * width * height / 16.0f;
+    areaMaxValue = areaMax * areaMax * areaMax * width * height;
+    finder.setMinArea(areaMinValue);
+    finder.setMaxArea(areaMaxValue);
+}
+
+ofx::helper::OSCTracking::~OSCTracking(){
     delete [] buffer;
 }
 
-void np::helper::OSCTracking::setup( int width, int height, const cv::Mat & toImitate ){
+void ofx::helper::OSCTracking::setup( int width, int height, const cv::Mat & toImitate ){
     this->width = width;
     this->height = height;
-
+    
+    float dummy = 0.0f;
+    onArea( dummy );
+    
     // --------------- generating ports ------------------------------------ 
     int port = 12345;
     
@@ -121,18 +134,18 @@ void np::helper::OSCTracking::setup( int width, int height, const cv::Mat & toIm
 
 }
 
-void np::helper::OSCTracking::updateSync(){
+void ofx::helper::OSCTracking::updateSync(){
     synchronizer.update();
 }
 
-void np::helper::OSCTracking::update( cv::Mat & frame ){
+void ofx::helper::OSCTracking::update( cv::Mat & frame ){
 
     if( takeBackground ){
         background = frame;
         takeBackground = false;
     }
 
-    if( doBackgroundSubtraction ){
+    if( backgroundSubtraction ){
         cv::Mat subtracted;
         cv::subtract( frame, background, subtracted );
         frame = subtracted;
@@ -147,13 +160,8 @@ void np::helper::OSCTracking::update( cv::Mat & frame ){
     cv::bitwise_and(tLow, tHigh, thresh );
 
     // set contour tracker parameters
-    finder.setMinArea(minArea);
-    finder.setMaxArea(maxArea);
-    finder.setFindHoles( false );
-
     finder.getTracker().setPersistence(persistence);
     finder.getTracker().setMaximumDistance(maxDistance);
-
 
     switch( sendImage ){
         case 1:
@@ -207,7 +215,7 @@ void np::helper::OSCTracking::update( cv::Mat & frame ){
 }
 
 
-void np::helper::OSCTracking::doBlobs(){
+void ofx::helper::OSCTracking::doBlobs(){
 
     float x0 = filterMinX*width;
     float x1 = filterMaxX*width;
