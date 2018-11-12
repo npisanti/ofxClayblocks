@@ -10,7 +10,6 @@ namespace ofx { namespace clayblocks {
 class CvTracker{
 
 public:
-    CvTracker();
 
     struct Blob {
         Blob();
@@ -22,7 +21,7 @@ public:
         ofPolyline contour;
     };
 
-    void setup( int oscPort, std::string serverIp, int syncReceivePort=4243, int syncSendPort=4244 );
+    void setup( std::string serverIP );
 
     void update();
 
@@ -34,9 +33,10 @@ public:
 
     ofParameterGroup tracker;
         ofParameter<bool> doBackgroundSubtraction;
+        ofParameter<bool> takeBackground;
         ofParameter<bool> denoise;
-        ofParameter<int> low;
-        ofParameter<int> high;
+        ofParameter<int> thresholdLow;
+        ofParameter<int> thresholdHigh;
         ofParameter<int> minArea;
         ofParameter<int> maxArea;
         ofParameter<int> persistence;
@@ -56,12 +56,20 @@ public:
         ofParameter<int> simulatedBlobs;
         ofParameter<float> speed;
 
+    ofParameterGroup sync;
+    
+protected: 
+    virtual void cameraOptions() = 0;
+    
+    std::string classname;
+
+
 private:
     void updateBlob( Blob & blob, ofxOscMessage & m );
     void onSimulate( bool & value );
 
     ofxOscReceiver oscReceiver;
-    ofxOscParameterSync sync;
+    ofxOscParameterSync synchronizer;
 
     bool bImageReceived;
     ofImage receivedImage;

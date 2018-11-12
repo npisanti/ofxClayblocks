@@ -20,9 +20,9 @@ Each piezos has some parameters to change its settings:
 
 You can access to this parameters by code (or GUI) from the `ofx::clayblocks::Piezos` class, it has a public `piezos` vector for the 6 piezos and each item in the vector exposes all those parameter with the corresponding name written in camel case. Run the `example_piezos` for a practical explanation.
 
-For more info on how to build the hardware, go into the [hardware](https://github.com/npisanti/ofxClayblocks/tree/master/cb_rpiezos/hardware) folder.
+For more info on how to build the hardware, go into the [hardware](https://github.com/npisanti/ofxClayblocks/tree/master/cb_piezos/hardware) folder.
 
 perfboard prototype:
 <p align="center">
-  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_rpiezos/prototype.jpg" width="700">
+  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_piezos/prototype.jpg" width="700">
 </p>

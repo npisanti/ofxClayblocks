@@ -1,8 +1,11 @@
 {
     "settings": {
-        "draw_to_screen": "1", 
-        "kinect_tilt": "10",
-        "cvtracker": {
+        "draw_to_screen": "0",
+        "kinect": {
+            "tilt": "10",
+            "use_depth": "1"
+        },
+        "tracking": {
             "area_max": "15000",
             "area_min": "100",
             "background_subtraction": "0",
@@ -16,13 +19,7 @@
             "deadzone_height" : "0"
         },
         "network": {
-            "client_ip": "169.254.0.1",
-            "ports": {
-                "tracking_send": "12345",
-                "image_send": "4242",
-                "sync_send": "4243",
-                "sync_receive": "4244"
-            }
+            "client_ip": "localhost"
         }
     }
 }

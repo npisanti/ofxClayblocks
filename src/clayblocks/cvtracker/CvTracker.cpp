@@ -13,32 +13,65 @@ ofx::clayblocks::CvTracker::Blob::Blob(){
     boundaries = ofRectangle( 0, 0, 0, 0 );
 }
 
-ofx::clayblocks::CvTracker::CvTracker(){
+void ofx::clayblocks::CvTracker::onSimulate( bool & value ){
+    if( ! simulate ){
+        blobs.clear();
+    }
+}
+
+void ofx::clayblocks::CvTracker::setup( std::string serverIP ){
+    classname = "ofx::clayblocks::CvTracker";
 
     parameters.setName( "CvTracker" );
+    
+    cameraOptions();
+    
+    sync.setName( "sync");
+        sync.add( doBackgroundSubtraction.set("background subtraction", false) );
+        sync.add( takeBackground.set("take background", false) );
+        sync.add( denoise.set("denoise", false) );
+        sync.add( thresholdLow.set("threshold low", 0, 0, 255) );
+        sync.add( thresholdHigh.set("threshold high", 255, 0, 255) );
+        sync.add( minArea.set("area min", 20, 1, 5000) );
+        sync.add( maxArea.set("area max", 15000, 1, 100000) );;
+        sync.add( persistence.set("persistence", 15, 1, 100) );
+        sync.add( maxDistance.set("max distance", 32, 1, 100) );
 
-    tracker.setName( "cvtracker");
-        tracker.add( doBackgroundSubtraction.set("background subtraction", false) );
-        tracker.add( denoise.set("denoise", false) );
-        tracker.add( low.set("threshold low", 0, 0, 255) );
-        tracker.add( high.set("threshold high", 255, 0, 255) );
-        tracker.add( minArea.set("area min", 20, 1, 5000) );
-        tracker.add( maxArea.set("area max", 15000, 1, 50000) );;
-        tracker.add( persistence.set("persistence", 15, 1, 100) );
-        tracker.add( maxDistance.set("max distance", 32, 1, 100) );
+        sync.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
+        sync.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
+        sync.add( filterRatio.set("filter ratio", 10.0f, 1.0f, 25.0f) );
+        sync.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
+        sync.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
+        sync.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
+        sync.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
 
-        tracker.add( filterDeltaDistance.set("filter delta distance", 5, 0, 80) );
-        tracker.add( filterDeltaVelocity.set("filter delta velocity", 0.01f, 0.00001f, 1.0f) );
-        tracker.add( filterRatio.set("filter ratio", 10.0f, 1.0f, 25.0f) );
-        tracker.add( filterMinX.set("filter min X", 0.0f, 0.0f, 1.0f) );
-        tracker.add( filterMaxX.set("filter max X", 1.0f, 0.0f, 1.0f) );
-        tracker.add( filterMinY.set("filter min Y", 0.0f, 0.0f, 1.0f) );
-        tracker.add( filterMaxY.set("filter max Y", 1.0f, 0.0f, 1.0f) );
-
-        tracker.add( sendContours.set( "send contours", false ) );
-        tracker.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
-        tracker.add( sendImage.set("send image", 0, 0, 2) );
+        sync.add( sendContours.set( "send contours", false ) );
+        sync.add( simplifyContours.set( "simplify contours", 0.6f, 0.0f, 2.0f ) );
+        sync.add( sendImage.set("send image", 0, 0, 2) );
+    
+    tracker.setName("tracker" );
+        tracker.add( doBackgroundSubtraction );
+        tracker.add( takeBackground );
+        tracker.add( denoise );
+        tracker.add( thresholdLow );
+        tracker.add( thresholdHigh );
+        tracker.add( minArea );
+        tracker.add( maxArea );
+        tracker.add( persistence );
+        tracker.add( maxDistance);
+        tracker.add( filterDeltaDistance );
+        tracker.add( filterDeltaVelocity );
+        tracker.add( filterRatio );
+        tracker.add( filterMinX );
+        tracker.add( filterMaxX );
+        tracker.add( filterMinY );
+        tracker.add( filterMaxY );
+        tracker.add( sendContours );
+        tracker.add( simplifyContours );
+        tracker.add( sendImage );    
+        
     parameters.add( tracker );
+
 
     simulation.setName( "simulation" );
         simulation.add( simulate.set("simulate", false) );
@@ -49,35 +82,45 @@ ofx::clayblocks::CvTracker::CvTracker(){
 
     simulate.addListener( this, &ofx::clayblocks::CvTracker::onSimulate );
 
-}
-
-
-void ofx::clayblocks::CvTracker::onSimulate( bool & value ){
-    if( ! simulate ){
-        blobs.clear();
-    }
-}
-
-void ofx::clayblocks::CvTracker::setup( int oscPort, std::string serverIp, int syncReceivePort, int syncSendPort ){
+    // setup group for OSC parameter sync 
+    //sync.setName("trackersync");
+    //sync.add( doBackgroundSubtraction );
+    //sync.add( sendImage );
+    //sync.add( tracker );
 
     blobs.reserve( 128 );
-
-    std::cout<<"[CvTracker client] listening for tracking OSC on port "<<oscPort<<"\n";
-    std::cout<<"[CvTracker client] syncing parameters to "<<serverIp<<" with ports "<<syncSendPort<<" (send) and "<<syncReceivePort<<" (receive) \n";
-
-    oscReceiver.setup( oscPort );
-
-    sync.setup( tracker, syncReceivePort, serverIp, syncSendPort );
-
     receivedImage.allocate( BUFFERW, BUFFERH, OF_IMAGE_COLOR );
     bImageReceived = false;
+
+    // --------------- generating ports ------------------------------------ 
+    int port = 12345;
+    
+    std::string portGenerator = serverIP;
+    
+    if( serverIP=="localhost" ){ // generate ports from first IP
+        const auto & myIPs = ofSplitString( ofSystem( "hostname -I" ), " " );
+        portGenerator = myIPs[0];
+    }
+    
+    const auto & addressNumbers = ofSplitString( portGenerator, "." );
+    port = 2000 + ofToInt(addressNumbers[3]);
+    int serverSyncSend = 3000 + ofToInt(addressNumbers[3]);
+    int serverSyncReceive = 4000 + ofToInt(addressNumbers[3]);
+
+    // ---------------- OSC setup ----------------------------------------------
+    oscReceiver.setup( port ); 
+    std::cout<<"["<<classname<<"] receiving OSC on port "<<port<<"\n";   
+
+    synchronizer.setup( sync, serverSyncSend, serverIP, serverSyncReceive );
+    std::cout<<"["<<classname<<"] syncing parameters on port "<<serverSyncReceive<<" (send) and port "<<serverSyncSend<<" (receive)\n";
+
 }
 
 
 void ofx::clayblocks::CvTracker::update(){
 
     if( ! simulate ){
-        sync.update();
+        synchronizer.update();
 
         while( oscReceiver.hasWaitingMessages() ){
             ofxOscMessage m;
