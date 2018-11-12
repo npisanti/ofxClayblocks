@@ -28,7 +28,7 @@ The tracker has some parameters to change its settings:
 - `threshold high` : high pixel value for cv threshold
 - `area min` : minimum area for tracking, exp cubic control from zero to 1/16th of the total area
 - `area max` : maximum area for tracking, exp cubic control from zero the total area
-- `persistence' : determines how many frames an object can last without being seen until the tracker forgets about it
+- `persistence` : determines how many frames an object can last without being seen until the tracker forgets about it
 - `max distance` : how far an object can move until the tracker considers it a new object
 - `filter delta distance` : don't send an OSC message if the blob doesn't move more than this distance
 - `filter delta velocity` : don't send an OSC message if the blob doesn't have a change in speed bigger that this value
@@ -38,8 +38,8 @@ The tracker has some parameters to change its settings:
 - `filter max Y` : don't send an OSC message based on center position, filters high y boundary
 - `send contours` : send full contour information
 - `simplify contours` : amount of contour simplification before sending OSC
-- `send image' : when it's different than 0 a low res version of the camera image is sent over OSC, enable it just for setting up and then deactivate it to save network bandwidth, 0 is off, 1 is the camera image, 2 the thresholded image
+- `send image` : when it's different than 0 a low res version of the camera image is sent over OSC, enable it just for setting up and then deactivate it to save network bandwidth, 0 is off, 1 is the camera image, 2 the thresholded image
 
 You can access to this parameters by code (or GUI) from the `ofx::clayblocks::IRTracker` class. the member names for the class are the corresponding name written in camel case. The class has also other parameters to change the camera settings and enable a simulation of the blobs when you want to try something without the rpi device.
 
-The `example_trackers` is an example/demo for the clients of bot this class and `ofx::clayblocks::KinectTracker`, select the one you want to use in `ofApp.h`.
+The `example_trackers` is an example/demo for the clients of both `ofx::clayblocks::IRTracker` and `ofx::clayblocks::KinectTracker`, select the one you want to use in `ofApp.h`.
