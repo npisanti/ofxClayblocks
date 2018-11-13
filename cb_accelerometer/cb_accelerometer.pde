@@ -1,6 +1,6 @@
 // ----------- SETUP ----------------------------
 String destinationIP = "192.168.1.4";
-int    port          = 12345;
+int    port          = 7001;
 String id            = "phone";
 float  deadzone      = 0.7;
 float  boundary      = 6.0;

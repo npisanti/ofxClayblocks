@@ -103,7 +103,7 @@ public void keyPressed() {
 
     if ( bSettings && keyMode!=-1) {
         
-        if(key==ENTER) {
+        if(key==10) {
             switch(keyMode) {
                 case 0:
                     id = typing;
@@ -126,6 +126,5 @@ public void keyPressed() {
         }else{
             typing += (char) key;
         }
-    }
-    
+    }   
 }
