@@ -12,7 +12,7 @@ void ofx::clayblocks::IRTracker::cameraOptions() {
     sync.add( contrast.set("contrast", 50 , -100,100) );
     sync.add( brightness.set("brightness", 60, 0,100) );
     sync.add( awbMode.set("white balance mode", 7, 0, 10) );
-    sync.add( exposureMode.set("exposure mode", 2, 0, 13) );
+    sync.add( exposureMode.set("exposure mode", 2, 0, 12) );
     
     camera.setName( "camera");
         camera.add( saturation );
