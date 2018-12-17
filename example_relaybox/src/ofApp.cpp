@@ -7,7 +7,7 @@ void ofApp::setup(){
 	ofSetFrameRate(60); // run at 60 fps
 	ofSetVerticalSync(true);
 
-    relays.setup( "192.168.0.22" );
+    relays.setup( "169.254.0.2" );
     relays.label( 3, "big fan" );
     relays.label( 4, "lamp" );
 

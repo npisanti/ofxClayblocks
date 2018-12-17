@@ -32,16 +32,17 @@ public:
             commands[i].parameters.add( commands[i].address.set("address", "/relay/k" + ofToString(i+1)));
             commands[i].parameters.add( commands[i].num.set("gpio", 17+i, 0, 40) );
             parameters.add( commands[i].parameters );
-            
-            commands[i].gpio.setup( commands[i].num );
-            commands[i].gpio.export_gpio();
-            commands[i].gpio.setdir_gpio("out");
-            
-            cout<< "[cb_relaybox] osc="<<commands[i].address<< " | gpio=" << commands[i].num << "\n";
         }
         
         ofJson json = ofLoadJson("settings.json");
         ofDeserialize( json, parameters );
+
+        for(size_t i = 0; i < commands.size(); i++){
+            commands[i].gpio.setup( commands[i].num );
+            commands[i].gpio.export_gpio();
+            commands[i].gpio.setdir_gpio("out");
+            cout<< "[cb_relaybox] osc="<<commands[i].address<< " | gpio=" << commands[i].num << "\n";
+        }
 
         //ofJson json;
         //ofSerialize( json, parameters );
@@ -64,6 +65,7 @@ public:
             
             std::cout<<"[cb_relaybox] listening on port "<<port<< "\n";
         }
+
     }
 
     //-------------------------------------------------------------------------

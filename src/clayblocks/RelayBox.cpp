@@ -48,9 +48,9 @@ template<int index> void ofx::clayblocks::RelayBox::onBoolChange( bool & value )
     ofxOscMessage m;
     m.setAddress( addresses[index] );
     if( relays[index] ){
-        m.addIntArg(0); // 0 opens the circuit 
-    }else{
         m.addIntArg(1);
+    }else{
+        m.addIntArg(0);
     }
     sender.sendMessage(m, false);
 }
@@ -61,5 +61,5 @@ ofParameterGroup & ofx::clayblocks::RelayBox::label( std::string deviceName ){
 }
 
 void ofx::clayblocks::RelayBox::label( int index, std::string relayLabel ){
-    relays[index].setName( "K"+ofToString(index) + " (" + relayLabel+")" );
+    relays[index].setName( "K"+ofToString(index+1) + " (" + relayLabel+")" );
 }
