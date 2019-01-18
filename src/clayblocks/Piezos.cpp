@@ -220,13 +220,16 @@ void ofx::clayblocks::Piezos::draw( float x, float y, float w, float h, const of
     ofPopStyle();
 }
 
-void ofx::clayblocks::Piezos::drawEnvelopes( int x, int y, int w ){
-	ofPushMatrix();
-	ofTranslate( x, y + 10 );
-		const int h = 14;
-		const int sep = 25;
+void ofx::clayblocks::Piezos::drawEnvelopes( int x, int y, int w, std::string name, int max ){
+    ofDrawBitmapString( name, x, y + 21 );
+    
+    const int sep = 25;
+    const int h = 14;
+    
+	ofPushMatrix();    
+	ofTranslate( x, y + 10 + sep );
 		ofFill();
-        for (int i=0; i<6; ++i ){
+        for (int i=0; i<max; ++i ){
             ofDrawBitmapString( "piezo "+ofToString(i), 0, sep*i +11 );
             ofDrawRectangle( 40, sep*i, piezos[i].value*(w-40), h );
         }

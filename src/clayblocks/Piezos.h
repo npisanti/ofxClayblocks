@@ -61,7 +61,7 @@ public:
     bool trigger( int index ) const { return piezos[index].trig; }
 	float envelope( int index ) const {  return piezos[index].env; }
 
-	void drawEnvelopes( int x, int y, int w );
+	void drawEnvelopes( int x, int y, int w, std::string name="PIEZOS", int max=6 );
 
     ofParameterGroup parameters;
 
