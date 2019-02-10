@@ -231,7 +231,7 @@ void ofx::clayblocks::Piezos::drawEnvelopes( int x, int y, int w, std::string na
 		ofFill();
         for (int i=0; i<max; ++i ){
             ofDrawBitmapString( "piezo "+ofToString(i), 0, sep*i +11 );
-            ofDrawRectangle( 40, sep*i, piezos[i].value*(w-40), h );
+            ofDrawRectangle( 70, sep*i, piezos[i].value*(w-70), h );
         }
 	ofPopMatrix();
 }
