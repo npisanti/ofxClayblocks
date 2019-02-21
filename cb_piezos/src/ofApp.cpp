@@ -10,7 +10,7 @@ void ofApp::setup(){
     sync.setName( "sync piezos" );
 
     network.setName("network");
-        network.add( clientIP.set("client ip", "localhost") );
+        if(!cliInput)  network.add( clientIP.set("client ip", "localhost") );
     parameters.add( network );
     
     piezos.resize( 6 );
@@ -31,27 +31,40 @@ void ofApp::setup(){
     // --------------- generating ports ------------------------------------ 
     int port = 12345;
     
-    const auto & myIPs = ofSplitString( ofSystem( "hostname -I" ), " " );
+    std::string portGenerator;
+    
+    if( !cliInput ){
+        const auto & myIPs = ofSplitString( ofSystem( "hostname -I" ), " " );
 
-    // check for similarity to the clientIP
-    int chosen = 0;
-    int greatestSim = 0;
-    for( size_t i=0; i<myIPs.size(); ++i ){
-        int min = (clientIP.get().size() < myIPs[i].size()) ? clientIP.get().size() : myIPs[i].size();
-        int similarity = 0;
-        for(int k=1; k<min; ++k){
-            if( clientIP.get().substr(0, k) == myIPs[i].substr(0, k) ){
-                similarity++;
+        // check for similarity to the clientIP
+        int chosen = 0;
+        int greatestSim = 0;
+        for( size_t i=0; i<myIPs.size(); ++i ){
+            int min = (clientIP.get().size() < myIPs[i].size()) ? clientIP.get().size() : myIPs[i].size();
+            int similarity = 0;
+            for(int k=1; k<min; ++k){
+                if( clientIP.get().substr(0, k) == myIPs[i].substr(0, k) ){
+                    similarity++;
+                }
+            }
+            if( similarity > greatestSim ){
+                greatestSim = similarity;
+                chosen = i;
             }
         }
-        if( similarity > greatestSim ){
-            greatestSim = similarity;
-            chosen = i;
-        }
+        
+        // in case of localhost, the first will be chosen 
+        portGenerator = myIPs[chosen];         
+    }else{
+        std::string call = "ip addr add ";
+        call += rpiIP;
+        call +="/24 dev ";
+        call += devname;
+        std::cout << "calling: "<<call<<"\n";
+        ofSystem( call );
+        portGenerator = rpiIP;
     }
-    
-    // in case of localhost, the first will be chosen 
-    std::string portGenerator = myIPs[chosen]; 
+
     
     const auto & addressNumbers = ofSplitString( portGenerator, "." );
     port = 2000 + ofToInt(addressNumbers[3]);

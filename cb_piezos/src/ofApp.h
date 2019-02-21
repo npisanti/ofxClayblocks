@@ -25,4 +25,7 @@ class ofApp : public ofBaseApp{
 #ifdef __ARM_ARCH   
         MCP a2d;
 #endif
+        bool cliInput;
+        std::string rpiIP;
+        std::string devname;
 };

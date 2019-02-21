@@ -3,14 +3,27 @@
 #include "ofAppNoWindow.h"  
 
 //========================================================================
-int main( ){
+int main( int argc, char *argv[] ){
 
     ofAppNoWindow window;  
-    ofSetupOpenGL(&window, 256,256,OF_WINDOW);  
+    
+    ofApp *app = new ofApp();
 
-	// this kicks off the running of my app
-	// can be OF_WINDOW or OF_FULLSCREEN
-	// pass in width and height too:
-	ofRunApp( new ofApp());
+    app->cliInput = false;
+
+    if(argc>3){		
+        for( int i=1; i<argc; ++i ){
+            switch( i ){
+                case 1: app->rpiIP = std::string( argv[i] ); break;
+                case 2: app->clientIP = std::string( argv[i] ); break;
+                case 3: app->devname = std::string( argv[i] ); break;
+                default : break;
+            }
+        }   
+        app->cliInput = true;
+    }
+
+    ofSetupOpenGL(&window, 256,256,OF_WINDOW);  
+	ofRunApp( app );
 
 }
