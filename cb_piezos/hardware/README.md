@@ -15,7 +15,7 @@ A the moment you need those component for one shield:
    
 This is a breadboard prototype for one of the sensor input (you need 5.1 zener diodes, 1M, 1.8k and 560 ohm resistors and an MCP3008 DAC), basically the 5v piezo input has to go into a voltage divider before going into the MCP3008 input, as the MP3008 runs at 3.3v:   
 <p align="center">
-  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_rpiezos/hardware/breadboard.jpg" width="700">
+  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_piezos/hardware/breadboard.jpg" width="700">
 </p>
    
 The rPi 40pin GPIO has to be connected to the MCP3008 making these connections:   
@@ -33,13 +33,13 @@ GROUND------>AGND
 
 For the piezo cables you need 3.5mm mono jacks, and coaxial mono cables. The inner part of the cables goes to the inner part of the piezo and to the shorter of the two jack connections. You could also put some hot glue on the piezos for making the connections stronger.   
 <p align="center">
-  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_rpiezos/hardware/jack.jpg" width="700">
+  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_piezos/hardware/jack.jpg" width="700">
 </p>
     
    
 Here is my messy perfboard prototype of the shield, if you want to do somethings like this remember that from above the rPi GPIO are the same, but the MCP3008 pin will be mirrored.  
 <p align="center">
-  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_rpiezos/hardware/perfboard.jpg" width="700">
+  <img src="https://raw.githubusercontent.com/npisanti/ofxClayblocks/master/cb_piezos/hardware/perfboard.jpg" width="700">
 </p>   
    
    
