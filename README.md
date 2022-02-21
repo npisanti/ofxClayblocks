@@ -14,11 +14,6 @@ Relative openFrameworks receiver classes to have a fast to use client side API a
 
 Go into the respective server app folder for a specific README.md with more informations about usage, pictures and code building instructions.
 
-Donate
------------- 
-I support you, you support me!    
-If you find this code useful, consider [fueling me with coffee](https://ko-fi.com/npisanti)!
-
 License 
 ------------
 Nicola Pisanti, MIT License, 2018
